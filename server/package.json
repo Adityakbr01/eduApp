@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "tsc && tsc-alias && nodemon dist/server.js",
     "build": "tsc && tsc-alias",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "seed:rbac": "tsx src/scripts/seedRBAC.ts"
   },
   "keywords": [],
   "author": "",
@@ -33,6 +34,7 @@
     "@types/node": "^24.9.2",
     "nodemon": "^3.1.10",
     "tsc-alias": "^1.8.16",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   }
 }

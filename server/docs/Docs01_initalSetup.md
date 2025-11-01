@@ -103,6 +103,7 @@ Dev dependencies (tools used during development):
 
 - typescript — TypeScript compiler
 - tsc-alias — Rewrite compiled import paths (if using path aliases)
+- tsx — TypeScript execution environment for Node.js
 - nodemon — Auto-restart server during development
 - @types/* — Type definitions for Node / Express / other libs
 
@@ -151,6 +152,7 @@ npm start
 ```
 
 ## Next steps
+ - Building RBAC (Role-Based Access Control) system
  - Building api for authentication 
  - Building api for user management
  - Building api for user roles and permissions

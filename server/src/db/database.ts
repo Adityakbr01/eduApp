@@ -1,11 +1,13 @@
-import mongoose from "mongoose";
 import _config from "configs/_config.js";
+import mongoose from "mongoose";
 import logger from "../helpers/logger.js";
 
 export async function connectToDatabase() {
     try {
         await mongoose.connect(_config.MONGO_URI);
         logger.info("✅ Connected to MongoDB");
+        //adding seed data function here
+        logger.info("🌱 Seeding initial data...");
     } catch (error) {
         logger.error("❌ MongoDB connection failed:", error);
         throw error;
