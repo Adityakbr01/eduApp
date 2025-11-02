@@ -2,7 +2,7 @@ import { Schema, model } from "mongoose";
 
 const permissionSchema = new Schema(
     {
-        code: { type: String, unique: true, required: true }, // course:create
+        code: { type: String, unique: true, required: true },
         description: String,
     },
     { timestamps: true }
