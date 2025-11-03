@@ -1,31 +1,15 @@
 import { Router } from "express";
+import { authController } from "src/controllers/index.js"
+import { validateSchema } from "src/middlewares/custom/validateSchema.js";
+import { registerSchema } from "src/validators/user.Schema.js";
 const router = Router();
 
-router.post("/auth/register/admin", (req, res) => {
-    res.send("Admin registered successfully");
-});
-
-router.post("/auth/register/manager", (req, res) => {
-    res.send("Manager registered successfully");
-});
-
-router.post("/auth/register/instructor", (req, res) => {
-    res.send("Instructor registered successfully");
-});
-
-router.post("/auth/register/support-team", (req, res) => {
-    res.send("Support team member registered successfully");
-});
-
-router.post("/auth/register/student", (req, res) => {
-    res.send("Student registered successfully");
-});
-
-router.post("/auth/verify/send-otp", (req, res) => {
+router.post("/register", validateSchema(registerSchema), authController.registerUser);
+router.post("/verify/send-otp", (req, res) => {
     res.send("Verification OTP sent");
 });
 
-router.post("/auth/verify/otp", (req, res) => {
+router.post("/verify/otp", (req, res) => {
     res.send("User verified successfully");
 });
 

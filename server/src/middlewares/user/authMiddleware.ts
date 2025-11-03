@@ -1,6 +1,6 @@
-import { Permission } from "src/models/permission.model.js";
-import { RolePermission } from "src/models/rolePermission.model.js";
-import { UserRole } from "src/models/userRole.model.js";
+import { Permission } from "src/models/RoleAndPermissions/permission.model.js";
+import { RolePermission } from "src/models/RoleAndPermissions/rolePermission.model.js";
+import { UserRole } from "src/models/RoleAndPermissions/userRole.model.js";
 
 
 export const getUserPermissions = async (userId: string) => {

@@ -16,6 +16,7 @@ export function defaultMiddlewares(app: express.Application) {
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
     app.use(cookieParser());
+    //todo: update cors origin
     app.use(cors({ origin: "*", credentials: true }));
     app.use(compression());
     morganLogger(app);

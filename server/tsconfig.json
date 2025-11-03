@@ -18,6 +18,9 @@
       "configs/*": [
         "./src/configs/*"
       ],
+      "controllers": [
+        "./src/controllers/*"
+      ],
       "environment/*": [
         "./src/environments/*"
       ],

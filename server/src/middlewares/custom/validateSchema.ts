@@ -1,28 +1,38 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { NextFunction, Request, RequestHandler, Response } from "express";
+import { ApiError } from "src/utils/apiError.js";
 import { ZodError, ZodType } from "zod";
+export const validateSchema
+    = (
+        schema: ZodType<any, any, any>
+    ): RequestHandler => {
+        return (req: Request, _res: Response, next: NextFunction): void => {
+            try {
+                const requestData = {
+                    ...req.body,
+                    ...((req as any).files || {}),
+                    ...req.query
+                };
 
-export const validateSchema = (schema: ZodType<any>): RequestHandler => {
-    return (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const data = {
-                body: req.body,
-                query: req.query,
-                params: req.params,
-                files: (req as any).files ?? null,
-            };
+                if (!requestData || Object.keys(requestData).length === 0) {
+                    // Throw error to be handled by global handler
+                    throw new ApiError({ message: "Request body is missing", statusCode: 400 });
+                }
 
-            const parsed = schema.parse(data);
+                const parsedData = schema.parse(requestData);
 
-            (req as any).validated = parsed;
+                // Attach parsed data to req for controller
+                req.body = parsedData;
 
-            next();
-        } catch (err) {
-            if (err instanceof ZodError) {
-                return next(
-                    err
-                );
+                next();
+            } catch (err: unknown) {
+                if (err instanceof ZodError) {
+                    next(err);
+                } else if (err instanceof ApiError) {
+                    next(err); // Already an ApiError, forward as is
+                } else {
+                    next(new ApiError({ message: "Unexpected error during validation", statusCode: 400 }));
+                }
             }
-            next(err);
-        }
+        };
     };
-};

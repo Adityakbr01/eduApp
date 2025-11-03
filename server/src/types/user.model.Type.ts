@@ -1,3 +1,4 @@
+import type { Types } from "mongoose";
 import type { Role } from "src/constants/roles.js";
 
 export interface InstructorProfile {
@@ -22,17 +23,33 @@ export interface SupportTeamProfile {
 }
 
 export interface IUser {
+    _id: Types.ObjectId
     name: string;
     email: string;
     password: string;
     role: Role;
+
+    accessToken?: string;
+    refreshToken?: string;
+    verifyOtp?: string;
+    verifyOtpExpiry?: Date;
+
+    isEmailVerified: boolean;
+    phone?: string;
+    address?: string;
+
+    permissions?: string[];
+
     isBanned: boolean;
-    isManagerApproved: boolean;
-    isInstructorApproved: boolean;
-    isSupportTeamApproved: boolean;
+    isManagerApproved?: boolean;
+    isInstructorApproved?: boolean;
+    isSupportTeamApproved?: boolean;
 
     instructorProfile?: InstructorProfile;
     studentProfile?: StudentProfile;
     managerProfile?: ManagerProfile;
     supportTeamProfile?: SupportTeamProfile;
+
+    generateAccessToken: () => string;
+    generateRefreshToken: () => string;
 }

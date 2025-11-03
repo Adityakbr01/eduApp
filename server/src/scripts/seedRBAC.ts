@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 import _config from "src/configs/_config.js";
 
-import { Permission } from "src/models/permission.model.js";
-import { Role } from "src/models/role.model.js";
-import { RolePermission } from "src/models/rolePermission.model.js";
+import { Permission } from "src/models/RoleAndPermissions/permission.model.js";
+import { Role } from "src/models/RoleAndPermissions/role.model.js";
+import { RolePermission } from "src/models/RoleAndPermissions/rolePermission.model.js";
 
 // ✅ Import constants
 import { PERMISSIONS } from "src/constants/permissions.js";
