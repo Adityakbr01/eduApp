@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 30
+    },
+    "auditLog": "C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs\\.37898cfa97c8830bf13a96baced74c15ee677983-audit.json",
+    "files": [
+        {
+            "date": 1762236420888,
+            "name": "C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs\\error-2025-11-04.log",
+            "hash": "e30daea952009504c12408436f722d9cdc870b6cb2882e47985a845551ca46ff"
+        }
+    ],
+    "hashType": "sha256"
+}

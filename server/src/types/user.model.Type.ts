@@ -1,6 +1,13 @@
 import type { Types } from "mongoose";
 import type { Role } from "src/constants/roles.js";
 
+
+export enum approvalStatus {
+    PENDING = "PENDING",
+    APPROVED = "APPROVED",
+    REJECTED = "REJECTED",
+}
+
 export interface InstructorProfile {
     bio?: string;
     expertise?: string[];
@@ -38,6 +45,9 @@ export interface IUser {
     phone?: string;
     address?: string;
 
+    approvalStatus?: approvalStatus;
+    approvedBy?: Types.ObjectId;
+
     permissions?: string[];
 
     isBanned: boolean;
@@ -50,6 +60,7 @@ export interface IUser {
     managerProfile?: ManagerProfile;
     supportTeamProfile?: SupportTeamProfile;
 
+    comparePassword: (password: string) => Promise<boolean>;
     generateAccessToken: () => string;
     generateRefreshToken: () => string;
 }

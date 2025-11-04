@@ -13,7 +13,6 @@ const HOST = _config.NODE_ENV === "development" ? `http://localhost:${_config.po
 async function startServer() {
     try {
         await connectToDatabase();
-
         app.listen(port, () => {
             logger.info(`🚀 Server running at port: ${port}`);
             logger.info(`🌱 Environment: ${_config.NODE_ENV}`);

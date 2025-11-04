@@ -43,6 +43,62 @@ Role-specific optional objects (only include when role requires):
 	- expertiseAreas?: string[]
 	}
 
+- example payload:
+
+```json
+
+{
+  "name": "user1",
+  "email": "user1@gmail.com",
+  "password": "Adityakbr01@",
+  "role": "student"
+}
+
+{
+  "name": "manager1",
+  "email": "manager1@gmail.com",
+  "password": "Adityakbr01@",
+  "role": "manager",
+  "managerProfile": {
+    "department": "Operations",
+    "teamSize": 5
+  }
+}
+,
+
+{
+  "name": "instructor1",
+  "email": "instructor1@gmail.com",
+  "password": "Adityakbr01@",
+  "role": "instructor",
+  "instructorProfile": {
+    "bio": "Experienced Web Developer and Educator.",
+    "expertise": ["JavaScript", "React", "Node.js"],
+    "experience": 3
+  }
+}
+
+{
+  "name": "support1",
+  "email": "support1@gmail.com",
+  "password": "Adityakbr01@",
+  "role": "support_team",
+  "supportTeamProfile": {
+    "shiftTimings": "9AM - 6PM",
+    "expertiseAreas": ["Student Queries", "Technical Support"]
+  }
+}
+,
+
+{
+  "name": "admin1",
+  "email": "admin1@gmail.com",
+  "password": "Adityakbr01@",
+  "role": "admin"
+}
+
+```
+
 Note: `studentProfile` is not expected in registration payload — students are registered with basic fields only.
 
 ## Validation

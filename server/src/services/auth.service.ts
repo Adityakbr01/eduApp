@@ -85,6 +85,146 @@ const authService = {
             role: user.role,
         };
     },
+    sendRegisterOtp: async (email: string) => {
+        const user = await User.findOne({ email }).select("+verifyOtp +verifyOtpExpiry");
+
+        if (!user) {
+            throw new ApiError({
+                statusCode: 404,
+                message: "User not found",
+                errors: [{ path: "email", message: "No account associated with this email" }],
+            });
+        }
+
+        if (user.isBanned) {
+            throw new ApiError({
+                statusCode: 403,
+                message: "Your account is banned",
+                errors: [{ path: "email", message: "Email is banned" }],
+            });
+        }
+
+        if (user.isEmailVerified) {
+            throw new ApiError({
+                statusCode: 400,
+                message: "Email is already verified",
+                errors: [{ path: "email", message: "Email is already verified" }],
+            });
+        }
+
+        const { otp, expiry } = generateOtp();
+
+        user.verifyOtp = otp;
+        user.verifyOtpExpiry = expiry;
+        await user.save();
+        await emailService.sendEmail(EmailType.VERIFY_OTP, {
+            email: user.email,
+            otp,
+        });
+    },
+    verifyRegisterOtp: async (email: string, otp: string) => {
+        const user = await User.findOne({ email }).select("+verifyOtp +verifyOtpExpiry");
+
+        if (!user) {
+            throw new ApiError({
+                statusCode: 404,
+                message: "User not found",
+                errors: [{ path: "email", message: "No account associated with this email" }],
+            });
+        }
+        if (user.isEmailVerified) {
+            throw new ApiError({
+                statusCode: 400,
+                message: "Email is already verified",
+                errors: [{ path: "email", message: "Email is already verified" }],
+            });
+        }
+        if (user.isBanned) {
+            throw new ApiError({
+                statusCode: 403,
+                message: "Your account is banned",
+                errors: [{ path: "email", message: "Email is banned" }],
+            });
+        }
+        if (String(user.verifyOtp) !== String(otp) || !user.verifyOtpExpiry || user.verifyOtpExpiry < new Date()) {
+            throw new ApiError({
+                statusCode: 400,
+                message: "Invalid or expired OTP",
+                errors: [{ path: "otp", message: "Invalid or expired OTP" }],
+            });
+        }
+
+        user.isEmailVerified = true;
+        user.verifyOtp = undefined;
+        user.verifyOtpExpiry = undefined;
+        user.approvedBy = undefined
+
+        // Generate tokens upon successful verification
+        user.accessToken = user.generateAccessToken();
+        user.refreshToken = user.generateRefreshToken();
+
+        await user.save();
+
+        return {
+            message: "Email verified successfully",
+            userId: user._id,
+            email: user.email,
+            role: user.role,
+            accessToken: user.generateAccessToken(),
+            refreshToken: user.generateRefreshToken(),
+        };
+    },
+    loginUser: async (email: string, password: string) => {
+        const user = await User.findOne({ email }).select("+password");
+
+        if (!user) {
+            throw new ApiError({
+                statusCode: 404,
+                message: "User not found",
+                errors: [{ path: "email", message: "No account associated with this email" }],
+            });
+        }
+        if (!user.isEmailVerified) {
+            throw new ApiError({
+                statusCode: 400,
+                message: "Email is not verified",
+                errors: [{ path: "email", message: "Please verify your email to login" }],
+            });
+        }
+        if (user.isBanned) {
+            throw new ApiError({
+                statusCode: 403,
+                message: "Your account is banned",
+                errors: [{ path: "email", message: "Email is banned" }],
+            });
+        }
+
+        const isPasswordValid = await user.comparePassword(password);
+        if (!isPasswordValid) {
+            throw new ApiError({
+                statusCode: 400,
+                message: "Invalid password",
+                errors: [{ path: "password", message: "Incorrect password" }],
+            });
+        }
+
+        user.accessToken = user.generateAccessToken();
+        user.refreshToken = user.generateRefreshToken();
+        await user.save();
+
+
+        return {
+            message: "Login successful",
+            userId: user._id,
+            email: user.email,
+            role: user.role,
+            isEmailVerified: user.isEmailVerified,
+            permissions: user.permissions,
+            approvalStatus: user.approvalStatus,
+            accessToken: user.accessToken,
+            refreshToken: user.refreshToken,
+        };
+    },
 };
 
 export default authService;

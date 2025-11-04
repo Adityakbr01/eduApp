@@ -67,11 +67,22 @@ const registerSchema = z.discriminatedUnion("role", [
     }),
 ]);
 
+//Register and Verify OTP
+const registerOtpSchema = z.object({
+    email: z.string().email("Invalid email"),
+});
+
+const verifyOtpSchema = z.object({
+    email: z.string().email("Invalid email"),
+    otp: z.string().length(6, "OTP must be 6 characters"),
+});
+
+
 const loginSchema = z.object({
     email: z.string().email("Invalid email"),
     password: z.string().min(1, "Password is required"),
 });
 
-export { registerSchema, loginSchema };
+export { registerSchema, loginSchema, registerOtpSchema, verifyOtpSchema };
 export type RegisterSchemaInput = z.infer<typeof registerSchema>;
 export type LoginSchemaInput = z.infer<typeof loginSchema>;

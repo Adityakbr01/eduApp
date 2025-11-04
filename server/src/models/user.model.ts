@@ -3,8 +3,9 @@ import type { Secret, SignOptions } from "jsonwebtoken";
 import jwt from "jsonwebtoken";
 import { Schema, model } from "mongoose";
 import _config from "src/configs/_config.js";
-import type { IUser } from "src/types/user.model.Type.js";
+import { approvalStatus, type IUser } from "src/types/user.model.Type.js";
 import { ROLES } from "../constants/roles.js";
+
 
 const userSchema = new Schema<IUser>(
     {
@@ -55,10 +56,24 @@ const userSchema = new Schema<IUser>(
             select: false,
         },
 
-        // Specific Permissions beyond role-based permissions
+
+
+        // Approval Flow
+        approvalStatus: {
+            type: String,
+            enum: approvalStatus,
+            default: function () {
+                return this.role === ROLES.STUDENT ? approvalStatus.APPROVED : approvalStatus.PENDING;
+            },
+        },
+
+        approvedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
+
+        // Specific Permissions beyond role-based permissions (rarely used)
         permissions: [{ type: String }], // e.g. ["READ_USER", "WRITE_COURSE"]
         //! Global Flags
         isBanned: { type: Boolean, default: false },
+
 
         //! Role Approval Flow
         // For Manager — approved by Admin
@@ -70,34 +85,54 @@ const userSchema = new Schema<IUser>(
         //! Support Team Profile
         isSupportTeamApproved: { type: Boolean, default: undefined, required: false },
 
-        //! Instructor Profile
+        //! Instructor Profile (only create for instructor users)
         instructorProfile: {
-            bio: String,
-            expertise: [String],
-            experience: Number,
-            default: undefined
+            // Prevent automatic _id for nested schema
+            type: new Schema({
+                bio: String,
+                expertise: [String],
+                experience: Number,
+            }, { _id: false }),
+
+            // Do NOT create by default
+            default: undefined,
+
+            // Do not show unless asked
+            select: false
         },
 
-        //! Student Profile
+        //! Student Profile (only for student users)
         studentProfile: {
-            enrolledCourses: [{ type: Schema.Types.ObjectId, ref: "Course" }],
-            progress: { type: Map, of: Number },
+            type: new Schema({
+                enrolledCourses: [{ type: Schema.Types.ObjectId, ref: "Course" }],
+                progress: { type: Map, of: Number },
+            }, { _id: false }),
+
             default: undefined
         },
 
-        //! Manager Profile
+        //! Manager Profile (only for manager users)
         managerProfile: {
-            department: String,
-            teamSize: Number,
-            default: undefined
+            type: new Schema({
+                department: String,
+                teamSize: Number,
+            }, { _id: false }),
+
+            default: undefined,
+            select: false
         },
 
-        //! Support Team Profile
+        //! Support Team Profile (only for support users)
         supportTeamProfile: {
-            shiftTimings: String,
-            expertiseAreas: [String],
-            default: undefined
+            type: new Schema({
+                shiftTimings: String,
+                expertiseAreas: [String],
+            }, { _id: false }),
+
+            default: undefined,
+            select: false
         },
+
     },
     { timestamps: true }
 );

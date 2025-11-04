@@ -6,6 +6,7 @@ import helmet from "helmet";
 import { morganLogger } from "./morganLogger.js";
 import { requestId } from "./requestId.js";
 import { securityHeaders } from "../security/securityHeaders.js";
+import { requestLogger } from "./requestLogger.js";
 
 export function defaultMiddlewares(app: express.Application) {
     app.use(requestId);
@@ -19,5 +20,7 @@ export function defaultMiddlewares(app: express.Application) {
     //todo: update cors origin
     app.use(cors({ origin: "*", credentials: true }));
     app.use(compression());
+    app.use(requestLogger);
+
     morganLogger(app);
 }
