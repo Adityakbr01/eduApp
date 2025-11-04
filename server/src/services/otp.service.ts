@@ -27,26 +27,68 @@ const templates = {
     [EmailType.VERIFY_OTP]: (data: any) => ({
         subject: "Verify Your Email",
         text: `Your verification OTP is ${data.otp}`,
-        html: `<p>Your verification OTP is <b>${data.otp}  || Exp: 5 mins</b></p>`,
+        html: `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <div style="text-align: center; padding: 20px; background-color: #ffffff; border-radius: 8px; margin-bottom: 20px;">
+                    <h2 style="color: #333333; margin: 0 0 15px 0; font-size: 24px; font-weight: 600;">Verify Your Email</h2>
+                    <p style="color: #666666; margin: 0 0 20px 0; font-size: 16px; line-height: 1.5;">Your verification code has been generated securely. Use it to complete your email verification.</p>
+                    <div style="background-color: #e3f2fd; padding: 20px; border-radius: 6px; border-left: 4px solid #2196f3; margin: 20px 0;">
+                        <p style="font-size: 32px; font-weight: bold; color: #1976d2; letter-spacing: 4px; margin: 0; text-align: center;">${data.otp}</p>
+                        <p style="color: #666666; margin: 10px 0 0 0; font-size: 14px; text-align: center;">Expires in 5 minutes</p>
+                    </div>
+                    <p style="color: #999999; font-size: 14px; margin: 20px 0 0 0; text-align: center;">If you didn't request this, please ignore this email.</p>
+                </div>
+            </div>
+        `,
     }),
-
     [EmailType.LOGIN_OTP]: (data: any) => ({
         subject: "Login Security OTP",
         text: `Your login OTP is ${data.otp}`,
-        html: `<p>Your login OTP is <b>${data.otp}</b></p>`,
+        html: `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <div style="text-align: center; padding: 20px; background-color: #ffffff; border-radius: 8px; margin-bottom: 20px;">
+                    <h2 style="color: #333333; margin: 0 0 15px 0; font-size: 24px; font-weight: 600;">Login Security Code</h2>
+                    <p style="color: #666666; margin: 0 0 20px 0; font-size: 16px; line-height: 1.5;">We've received a login attempt on your account. Use this one-time code to proceed securely.</p>
+                    <div style="background-color: #fff3e0; padding: 20px; border-radius: 6px; border-left: 4px solid #ff9800; margin: 20px 0;">
+                        <p style="font-size: 32px; font-weight: bold; color: #f57c00; letter-spacing: 4px; margin: 0; text-align: center;">${data.otp}</p>
+                        <p style="color: #666666; margin: 10px 0 0 0; font-size: 14px; text-align: center;">Valid for 5 minutes only</p>
+                    </div>
+                    <p style="color: #999999; font-size: 14px; margin: 20px 0 0 0; text-align: center;">For your security, never share this code with anyone.</p>
+                </div>
+            </div>
+        `,
     }),
-
     [EmailType.WELCOME]: (data: any) => ({
         subject: "Welcome!",
         text: `Welcome ${data.name}! Your account is ready.`,
-        html: `<p>Welcome <b>${data.name}</b>! 🎉 Your account is ready.</p>`,
+        html: `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <div style="text-align: center; padding: 20px; background-color: #ffffff; border-radius: 8px; margin-bottom: 20px;">
+                    <h1 style="color: #333333; margin: 0 0 15px 0; font-size: 32px; font-weight: 700;">Welcome Aboard! 🎉</h1>
+                    <p style="color: #666666; margin: 0 0 20px 0; font-size: 18px; line-height: 1.5;">Hello <strong style="color: #1976d2;">${data.name}</strong>,</p>
+                    <p style="color: #666666; margin: 0 0 30px 0; font-size: 16px; line-height: 1.5;">Your account is all set up and ready for you to dive in. We're excited to have you here!</p>
+                    <div style="background-color: #e8f5e8; padding: 20px; border-radius: 6px; border-left: 4px solid #4caf50; margin: 20px 0;">
+                        <p style="margin: 0; font-size: 16px; color: #2e7d32; text-align: center; font-weight: 500;">Start exploring your dashboard and unlock amazing features today.</p>
+                    </div>
+                    <p style="color: #999999; font-size: 14px; margin: 20px 0 0 0; text-align: center;">Need help? Reply to this email or check our support center.</p>
+                </div>
+            </div>
+        `,
     }),
-
     [EmailType.PASSWORD_RESET]: (data: any) => ({
         subject: "Reset Your Password",
         text: `Click here to reset your password: ${data.resetLink}`,
-        html: `<p>Click below to reset your password:</p>
-           <a href="${data.resetLink}">${data.resetLink}</a>`,
+        html: `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <div style="text-align: center; padding: 20px; background-color: #ffffff; border-radius: 8px; margin-bottom: 20px;">
+                    <h2 style="color: #333333; margin: 0 0 15px 0; font-size: 24px; font-weight: 600;">Password Reset Request</h2>
+                    <p style="color: #666666; margin: 0 0 20px 0; font-size: 16px; line-height: 1.5;">It looks like you requested to reset your password. If this wasn't you, you can safely ignore this email.</p>
+                    <a href="${data.resetLink}" style="display: inline-block; padding: 12px 24px; background-color: #2196f3; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 16px; margin: 20px 0; border: none; cursor: pointer; box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);">Reset Your Password</a>
+                    <p style="color: #999999; font-size: 14px; margin: 20px 0 0 0; text-align: center; word-break: break-all;">Or copy and paste this link: <span style="color: #666666; font-family: monospace;">${data.resetLink}</span></p>
+                    <p style="color: #999999; font-size: 14px; margin: 30px 0 0 0; text-align: center;">This link will expire in 1 hour for your security.</p>
+                </div>
+            </div>
+        `,
     }),
 };
 

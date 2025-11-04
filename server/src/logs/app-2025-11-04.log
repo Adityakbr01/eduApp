@@ -690,3 +690,201 @@
 {"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:21:17"}
 {"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:21:17"}
 {"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:21:17"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:27:48"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:27:48"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:27:48"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:27:48"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:27:48"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:27:48"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:27:52"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:27:52"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:27:52"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:27:52"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:27:52"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:27:52"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:28:03"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:28:04"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:28:04"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:28:04"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:28:04"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:28:04"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:29:51"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:29:51"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:29:51"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:29:51"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:29:51"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:29:51"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:29:52"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:29:52"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:29:52"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:29:52"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:29:52"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:29:52"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:29:57"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:29:58"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:29:58"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:29:58"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:29:58"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:29:58"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:30:00"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:30:01"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:30:01"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:30:01"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:30:01"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:30:01"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:30:09"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:30:10"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:30:10"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:30:10"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:30:10"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:30:10"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:30:14"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:30:15"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:30:15"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:30:15"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:30:15"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:30:15"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:30:17"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:30:17"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:30:17"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:30:17"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:30:17"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:30:17"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:30:19"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:30:19"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:30:19"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:30:19"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:30:19"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:30:19"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:30:23"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:30:24"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:30:24"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:30:24"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:30:24"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:30:24"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:30:27"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:30:27"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:30:27"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:30:27"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:30:27"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:30:27"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:30:30"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:30:31"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:30:31"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:30:31"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:30:31"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:30:31"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:30:44"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:30:45"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:30:45"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:30:45"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:30:45"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:30:45"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:30:55"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:30:55"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:30:55"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:30:55"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:30:55"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:30:55"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:30:58"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:30:59"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:30:59"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:30:59"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:30:59"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:30:59"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:31:14"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:31:14"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:31:14"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:31:14"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:31:14"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:31:14"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:31:15"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:31:16"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:31:16"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:31:16"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:31:16"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:31:16"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:32:04"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:32:04"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:32:04"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:32:04"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:32:04"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:32:04"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:32:28"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:32:29"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:32:29"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:32:29"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:32:29"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:32:29"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:32:35"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:32:35"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:32:35"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:32:35"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:32:35"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:32:35"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:33:01"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:33:02"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:33:02"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:33:02"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:33:02"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:33:02"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:33:13"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:33:14"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:33:14"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:33:14"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:33:14"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:33:14"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:33:22"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:33:22"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:33:22"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:33:22"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:33:22"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:33:22"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:33:27"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:33:27"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:33:27"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:33:27"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:33:27"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:33:27"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:33:29"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:33:29"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:33:29"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:33:29"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:33:29"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:33:29"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:33:38"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:33:39"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:33:39"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:33:39"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:33:39"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:33:39"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:33:45"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:33:45"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:33:45"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:33:45"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:33:45"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:33:45"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:35:04"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:35:05"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:35:05"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:35:05"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:35:05"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:35:05"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:35:09"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:35:09"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:35:09"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:35:09"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:35:09"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:35:09"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:35:28"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:35:28"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:35:28"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:35:28"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:35:28"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:35:28"}
+{"level":"info","logDir":"C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs","message":"✅ Logger initialized and transports ready","moduleName":"Logger","service":"app-service","timestamp":"2025-11-04 12:35:39"}
+{"level":"info","message":"✅ Connected to MongoDB","service":"app-service","timestamp":"2025-11-04 12:35:40"}
+{"level":"info","message":"🌱 Seeding initial data...","service":"app-service","timestamp":"2025-11-04 12:35:40"}
+{"level":"info","message":"🚀 Server running at port: 3001","service":"app-service","timestamp":"2025-11-04 12:35:40"}
+{"level":"info","message":"🌱 Environment: development","service":"app-service","timestamp":"2025-11-04 12:35:40"}
+{"level":"info","message":"🌐 Host: http://localhost:3001","service":"app-service","timestamp":"2025-11-04 12:35:40"}

@@ -159,9 +159,14 @@ const authService = {
         user.verifyOtpExpiry = undefined;
         user.approvedBy = undefined
 
+        let accessToken: string | null = null;
+        let refreshToken: string | null = null;
+
         // Generate tokens upon successful verification
-        user.accessToken = user.generateAccessToken();
-        user.refreshToken = user.generateRefreshToken();
+        if (user.role === ROLES.STUDENT) {
+            accessToken = user.generateAccessToken();
+            refreshToken = user.generateRefreshToken();
+        }
 
         await user.save();
 
@@ -170,8 +175,8 @@ const authService = {
             userId: user._id,
             email: user.email,
             role: user.role,
-            accessToken: user.generateAccessToken(),
-            refreshToken: user.generateRefreshToken(),
+            accessToken: accessToken,
+            refreshToken: refreshToken,
         };
     },
     loginUser: async (email: string, password: string) => {
@@ -196,6 +201,30 @@ const authService = {
                 statusCode: 403,
                 message: "Your account is banned",
                 errors: [{ path: "email", message: "Email is banned" }],
+            });
+        }
+
+        if (user.role === ROLES.MANAGER && !user.isManagerApproved) {
+            throw new ApiError({
+                statusCode: 403,
+                message: "Your manager account is not approved",
+                errors: [{ path: "role", message: "Manager account is not approved" }],
+            });
+        }
+
+        if (user.role === ROLES.INSTRUCTOR && !user.isInstructorApproved) {
+            throw new ApiError({
+                statusCode: 403,
+                message: "Your instructor account is not approved",
+                errors: [{ path: "role", message: "Instructor account is not approved" }],
+            });
+        }
+
+        if (user.role === ROLES.SUPPORT && !user.isSupportTeamApproved) {
+            throw new ApiError({
+                statusCode: 403,
+                message: "Your support team account is not approved",
+                errors: [{ path: "role", message: "Support team account is not approved" }],
             });
         }
 
