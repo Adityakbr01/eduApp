@@ -1,0 +1,23 @@
+### Next steps
+ - Building RBAC (Role-Based Access Control) system ✅
+ - Building api for authentication 
+   - Register User ✅
+   - Verify-register OTP ✅
+   - send-register OTP ✅
+   - login user ✅
+   - reset password ✅
+   - logout user ✅
+   - refresh token ✅
+   - get current user ✅
+   - change password ✅
+ - Building api for user management
+ - Building api for user roles and permissions
+ - Building api for course management
+ - Building api for course content management
+ - Building api for progress tracking
+ - Building api for assessments and quizzes
+ - Integrating third-party services (e.g., payment gateways, email services)
+ - Implementing frontend to interact with these apis
+ - Add a REST endpoint to manage roles and permissions (admin-only).
+ - Add a UI or admin dashboard for role management.
+ - Add integration tests for middleware and seeds.

@@ -1,22 +1,30 @@
-import { Permission } from "src/models/RoleAndPermissions/permission.model.js";
-import { RolePermission } from "src/models/RoleAndPermissions/rolePermission.model.js";
-import { UserRole } from "src/models/RoleAndPermissions/userRole.model.js";
+import jwt from "jsonwebtoken";
+import { ApiError } from "src/utils/apiError.js";
+import { getUserPermissions } from "./getUserPermissions.js";
+import type { JwtPayload } from "jsonwebtoken";
+import type { NextFunction } from "express";
+import _config from "src/configs/_config.js";
+import type { Request, Response } from "express";
 
+const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const token = req.cookies.accessToken;
+        if (!token) throw new ApiError({ statusCode: 401, message: "Unauthorized" });
 
-export const getUserPermissions = async (userId: string) => {
-    const userRoles = await UserRole.find({ userId });
+        const decoded = jwt.verify(token, _config.JWT_ACCESS_TOKEN_SECRET) as JwtPayload;
+        console.log("Auth Middleware Decoded:", decoded);
+        const RolePermissions = await getUserPermissions(decoded.userId);
 
-    const roleIds = userRoles.map(r => r.roleId);
+        req.user = {
+            id: decoded.userId,
+            role: decoded.role,
+            RolePermissions: RolePermissions,
+            permissions: decoded.permissions,
+        };
 
-    const rolePermissions = await RolePermission.find({
-        roleId: { $in: roleIds }
-    });
-
-    const permissionIds = rolePermissions.map(rp => rp.permissionId);
-
-    const permissions = await Permission.find({
-        _id: { $in: permissionIds }
-    });
-
-    return permissions.map(p => p.code);
+        next();
+    } catch (err) {
+        next(new ApiError({ statusCode: 401, message: "Unauthorized" }));
+    }
 };
+export default authMiddleware;

@@ -152,7 +152,7 @@ userSchema.methods.comparePassword = async function (plainPassword: string) {
 
 userSchema.methods.generateAccessToken = function () {
     return jwt.sign(
-        { id: this._id, role: this.role },
+        { userId: this._id, role: this.role, permissions: this.permissions },
         _config.JWT_ACCESS_TOKEN_SECRET as Secret,
         { expiresIn: _config.JWT_ACCESS_TOKEN_EXPIRES_IN as string } as SignOptions
     );
@@ -160,7 +160,7 @@ userSchema.methods.generateAccessToken = function () {
 
 userSchema.methods.generateRefreshToken = function () {
     return jwt.sign(
-        { id: this._id },
+        { userId: this._id },
         _config.JWT_REFRESH_TOKEN_SECRET as Secret,
         { expiresIn: _config.JWT_REFRESH_TOKEN_EXPIRES_IN as string } as SignOptions
     );

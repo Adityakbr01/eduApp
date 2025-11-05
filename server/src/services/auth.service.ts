@@ -4,9 +4,13 @@ import { ApiError } from "src/utils/apiError.js";
 import { generateOtp } from "src/utils/generateOtp.js";
 import type { RegisterSchemaInput } from "src/validators/user.Schema.js";
 import emailService, { EmailType } from "./otp.service.js";
+import CheckUserEmailAndBanned from "src/helpers/checkUserEmailAndBanned.js";
+import jwt from "jsonwebtoken"
+import _config from "src/configs/_config.js";
+//Todo  --> implement store opt in hashed password if db leak than protects it
 
 const authService = {
-    registerUser: async (data: RegisterSchemaInput) => {
+    registerUserService: async (data: RegisterSchemaInput) => {
         const existingUser = await User.findOne({ email: data.email });
 
         if (existingUser && existingUser.isEmailVerified && !existingUser.isBanned) {
@@ -85,32 +89,10 @@ const authService = {
             role: user.role,
         };
     },
-    sendRegisterOtp: async (email: string) => {
+    sendRegisterOtpService: async (email: string) => {
         const user = await User.findOne({ email }).select("+verifyOtp +verifyOtpExpiry");
 
-        if (!user) {
-            throw new ApiError({
-                statusCode: 404,
-                message: "User not found",
-                errors: [{ path: "email", message: "No account associated with this email" }],
-            });
-        }
-
-        if (user.isBanned) {
-            throw new ApiError({
-                statusCode: 403,
-                message: "Your account is banned",
-                errors: [{ path: "email", message: "Email is banned" }],
-            });
-        }
-
-        if (user.isEmailVerified) {
-            throw new ApiError({
-                statusCode: 400,
-                message: "Email is already verified",
-                errors: [{ path: "email", message: "Email is already verified" }],
-            });
-        }
+        CheckUserEmailAndBanned(user)
 
         const { otp, expiry } = generateOtp();
 
@@ -122,30 +104,12 @@ const authService = {
             otp,
         });
     },
-    verifyRegisterOtp: async (email: string, otp: string) => {
+    verifyRegisterOtpService: async (email: string, otp: string) => {
         const user = await User.findOne({ email }).select("+verifyOtp +verifyOtpExpiry");
 
-        if (!user) {
-            throw new ApiError({
-                statusCode: 404,
-                message: "User not found",
-                errors: [{ path: "email", message: "No account associated with this email" }],
-            });
-        }
-        if (user.isEmailVerified) {
-            throw new ApiError({
-                statusCode: 400,
-                message: "Email is already verified",
-                errors: [{ path: "email", message: "Email is already verified" }],
-            });
-        }
-        if (user.isBanned) {
-            throw new ApiError({
-                statusCode: 403,
-                message: "Your account is banned",
-                errors: [{ path: "email", message: "Email is banned" }],
-            });
-        }
+        CheckUserEmailAndBanned(user)
+
+
         if (String(user.verifyOtp) !== String(otp) || !user.verifyOtpExpiry || user.verifyOtpExpiry < new Date()) {
             throw new ApiError({
                 statusCode: 400,
@@ -179,30 +143,10 @@ const authService = {
             refreshToken: refreshToken,
         };
     },
-    loginUser: async (email: string, password: string) => {
+    loginUserService: async (email: string, password: string) => {
         const user = await User.findOne({ email }).select("+password");
 
-        if (!user) {
-            throw new ApiError({
-                statusCode: 404,
-                message: "User not found",
-                errors: [{ path: "email", message: "No account associated with this email" }],
-            });
-        }
-        if (!user.isEmailVerified) {
-            throw new ApiError({
-                statusCode: 400,
-                message: "Email is not verified",
-                errors: [{ path: "email", message: "Please verify your email to login" }],
-            });
-        }
-        if (user.isBanned) {
-            throw new ApiError({
-                statusCode: 403,
-                message: "Your account is banned",
-                errors: [{ path: "email", message: "Email is banned" }],
-            });
-        }
+        CheckUserEmailAndBanned(user)
 
         if (user.role === ROLES.MANAGER && !user.isManagerApproved) {
             throw new ApiError({
@@ -254,6 +198,147 @@ const authService = {
             refreshToken: user.refreshToken,
         };
     },
+    sendResetPassOtpService: async (email: string) => {
+        const user = await User.findOne({ email });
+        CheckUserEmailAndBanned(user)
+
+        const { otp, expiry } = generateOtp();
+
+        user.verifyOtp = otp;
+        user.verifyOtpExpiry = expiry;
+        await user.save();
+        await emailService.sendEmail(EmailType.PASSWORD_RESET_OTP, {
+            email: user.email,
+            otp,
+        });
+
+        return {
+            message: "Password reset otp sent successfully",
+            userId: user._id,
+            email: user.email,
+            role: user.role,
+        };
+
+    },
+    verifyResetPassOtpService: async (email: string, otp: string, newPassword: string) => {
+        const user = await User.findOne({ email }).select("+verifyOtp +verifyOtpExpiry +password");
+
+        CheckUserEmailAndBanned(user)
+
+
+        if (String(user.verifyOtp) !== String(otp) || !user.verifyOtpExpiry || user.verifyOtpExpiry < new Date()) {
+            throw new ApiError({
+                statusCode: 400,
+                message: "Invalid or expired OTP",
+                errors: [{ path: "otp", message: "Invalid or expired OTP" }],
+            });
+        }
+
+        user.verifyOtp = undefined;
+        user.verifyOtpExpiry = undefined;
+        user.password = newPassword
+        await user.save();
+
+        return {
+            message: "Password reset successfully",
+            userId: user._id,
+            email: user.email,
+            role: user.role,
+        };
+    },
+    changePasswordService: async (userId: string, currentPassword: string, newPassword: string) => {
+        const user = await User.findById(userId).select("+password");
+        CheckUserEmailAndBanned(user)
+
+        const isPasswordValid = await user.comparePassword(currentPassword);
+        if (!isPasswordValid) {
+            throw new ApiError({
+                statusCode: 400,
+                message: "Current password is incorrect",
+                errors: [{ path: "currentPassword", message: "Current password is incorrect" }],
+            });
+        }
+        user.password = newPassword;
+        await user.save();
+        return {
+            message: "Password changed successfully",
+            userId: user._id,
+            email: user.email,
+            role: user.role,
+        };
+    },
+    refreshTokenService: async (refreshToken: string) => {
+        if (!refreshToken) {
+            throw new ApiError({
+                statusCode: 401,
+                message: "Refresh token missing",
+            });
+        }
+        const user = jwt.verify(refreshToken, _config.JWT_REFRESH_TOKEN_SECRET!) as { userId: string };
+        if (!user) {
+            throw new ApiError({
+                statusCode: 401,
+                message: "Invalid refresh token",
+            });
+        }
+        const foundUser = await User.findById(user.userId).select("+refreshToken +accessToken");
+
+        if (!foundUser) {
+            throw new ApiError({
+                statusCode: 404,
+                message: "User not found",
+            });
+        }
+
+        CheckUserEmailAndBanned(foundUser);
+        const newAccessToken = foundUser.generateAccessToken();
+        foundUser.accessToken = newAccessToken;
+        await foundUser.save();
+        return {
+            message: "Token refreshed successfully",
+            accessToken: newAccessToken,
+        };
+    },
+    logoutUserService: async (refreshToken: string) => {
+        if (!refreshToken) {
+            throw new ApiError({
+                statusCode: 401,
+                message: "Refresh token missing",
+            });
+        } const user = jwt.verify(refreshToken, _config.JWT_REFRESH_TOKEN_SECRET!) as { userId: string };
+        if (!user) {
+            throw new ApiError({
+                statusCode: 401,
+                message: "Invalid refresh token",
+            });
+        }
+        const foundUser = await User.findById(user.userId).select("+refreshToken +accessToken");
+
+        if (!foundUser) {
+            throw new ApiError({
+                statusCode: 404,
+                message: "User not found",
+            });
+        }
+        CheckUserEmailAndBanned(foundUser);
+
+        foundUser.refreshToken = undefined;
+        foundUser.accessToken = undefined;
+        await foundUser.save();
+    },
+    getCurrentUserService: async (userId: string) => {
+        const user = await User.findById(userId).select("-password -verifyOtp -verifyOtpExpiry -refreshToken -accessToken");
+        if (!user) {
+            throw new ApiError({
+                statusCode: 404,
+                message: "User not found",
+            });
+        }
+        return {
+            message: "Current user fetched successfully",
+            user,
+        };
+    }
 };
 
 export default authService;
