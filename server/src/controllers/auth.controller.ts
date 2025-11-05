@@ -18,8 +18,6 @@ const authController = {
     verifyRegisterOtp: wrapAsync(async (req, res) => {
         const { email, otp } = req.body;
         const result = await authService.verifyRegisterOtpService(email, otp);
-        res.cookie("refreshToken", result.refreshToken, refreshTokenCookieOptions);
-        res.cookie("accessToken", result.accessToken, accessTokenCookieOptions);
         ApiResponder.success(res, 200, "User verified successfully", result);
     }),
     loginUser: wrapAsync(async (req, res) => {
@@ -75,8 +73,7 @@ const authController = {
         ApiResponder.success(res, 200, "User logged out successfully");
     }),
     getCurrentUser: wrapAsync(async (req, res) => {
-        const userId = req.user!.id!;
-        const result = await authService.getCurrentUserService(userId);
+        const result = await authService.getCurrentUserService(req);
         ApiResponder.success(res, 200, "Current user fetched successfully", result);
     }),
 };

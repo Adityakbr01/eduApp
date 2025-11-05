@@ -15,6 +15,7 @@ export const PERMISSIONS = {
 
     USER_CREATE: "user:create",   // e.g create a new user
     USER_READ: "user:read",      // e.g view user profile
+    USERS_READ: "users:read",    // e.g view list of users
     USER_UPDATE: "user:update",  // e.g update user profile
     USER_DELETE: "user:delete",  // e.g delete user account
     USER_MANAGE: "user:manage", // e.g manage user roles, permissions, etc.

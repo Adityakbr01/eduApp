@@ -1,7 +1,12 @@
-import { ROLES } from "src/constants/roles.js";
+import { ROLES, type Role } from "src/constants/roles.js";
 import z from "zod";
 
+
+const RoleEnum = z.enum(Object.values(ROLES) as [Role, ...Role[]]);
+
+
 const baseSchema = {
+    role: RoleEnum,
     name: z.string().min(2, "Name must be at least 2 characters"),
     email: z.string().email("Invalid email format"),
     password: z
@@ -60,7 +65,6 @@ const registerSchema = z.discriminatedUnion("role", [
         supportTeamProfile: supportTeamProfileSchema,
     }),
 
-    // If admin signup allowed
     z.object({
         ...baseSchema,
         role: z.literal(ROLES.ADMIN),
@@ -72,23 +76,48 @@ const registerOtpSchema = z.object({
     email: z.string().email("Invalid email"),
 });
 
+
+const registerVerifyOtpSchema = z.object({
+    email: z.string().email("Invalid email"),
+    otp: z.string().length(6, "OTP must be 6 characters"),
+});
 const verifyOtpSchema = z.object({
     email: z.string().email("Invalid email"),
     otp: z.string().length(6, "OTP must be 6 characters"),
     newPassword: z.string().min(6, "New password must be at least 6 characters"),
 });
-
 const changePasswordSchema = z.object({
     currentPassword: z.string().min(1, "Current password is required"),
     newPassword: z.string().min(6, "New password must be at least 6 characters"),
 });
-
-
 const loginSchema = z.object({
     email: z.string().email("Invalid email"),
     password: z.string().min(1, "Password is required"),
 });
+const updateUserSchema = z.object({
+    name: z.string().min(2, "Name must be at least 2 characters").optional(),
+    phone: z.string().optional().refine(
+        (value) => !value || /^[0-9]{10}$/.test(value),
+        "Invalid phone format"
+    ),
+    address: z.string().optional(),
+    isBanned: z.boolean().optional(),
+    permissions: z.array(z.string()).optional(),
+    isEmailVerified: z.boolean().optional(),
+});
 
-export { registerSchema, loginSchema, registerOtpSchema, verifyOtpSchema, changePasswordSchema };
+
+
+//Manage Permissions and Assign Roles
+
+const assignRoleSchema = z.object({
+    role: RoleEnum,
+});
+
+
+
+export { registerSchema, loginSchema, registerOtpSchema, verifyOtpSchema, registerVerifyOtpSchema, changePasswordSchema, updateUserSchema, assignRoleSchema };
 export type RegisterSchemaInput = z.infer<typeof registerSchema>;
 export type LoginSchemaInput = z.infer<typeof loginSchema>;
+
+export type AssignRoleSchemaInput = z.infer<typeof assignRoleSchema>;

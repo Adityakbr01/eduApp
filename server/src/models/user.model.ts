@@ -4,7 +4,8 @@ import jwt from "jsonwebtoken";
 import { Schema, model } from "mongoose";
 import _config from "src/configs/_config.js";
 import { approvalStatus, type IUser } from "src/types/user.model.Type.js";
-import { ROLES } from "../constants/roles.js";
+import { ROLES, type Role } from "../constants/roles.js";
+import { Role as RoleSchema } from "./RoleAndPermissions/role.model.js";
 
 
 const userSchema = new Schema<IUser>(
@@ -13,9 +14,9 @@ const userSchema = new Schema<IUser>(
         email: { type: String, unique: true, required: true },
         password: { type: String, required: true, select: false },
 
-        role: {
-            type: String,
-            enum: ROLES,
+
+        roleId: {
+            type: Schema.Types.ObjectId, ref: "Role",
             required: true,
         },
 
@@ -62,10 +63,9 @@ const userSchema = new Schema<IUser>(
         approvalStatus: {
             type: String,
             enum: approvalStatus,
-            default: function () {
-                return this.role === ROLES.STUDENT ? approvalStatus.APPROVED : approvalStatus.PENDING;
-            },
+            default: approvalStatus.PENDING, // will be overridden for student/admin
         },
+
 
         approvedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
 
@@ -74,16 +74,6 @@ const userSchema = new Schema<IUser>(
         //! Global Flags
         isBanned: { type: Boolean, default: false },
 
-
-        //! Role Approval Flow
-        // For Manager — approved by Admin
-        isManagerApproved: { type: Boolean, default: undefined, required: false },
-
-        // For Instructor — approved by Manager
-        isInstructorApproved: { type: Boolean, default: undefined, required: false },
-
-        //! Support Team Profile
-        isSupportTeamApproved: { type: Boolean, default: undefined, required: false },
 
         //! Instructor Profile (only create for instructor users)
         instructorProfile: {
@@ -138,6 +128,25 @@ const userSchema = new Schema<IUser>(
 );
 
 
+
+// set approvalStatus based on role
+userSchema.pre("save", async function (next) {
+    if (!this.isModified("roleId")) return next();
+
+    const role = await RoleSchema.findById(this.roleId).select("name").lean();
+    if (!role) return next();
+
+    const autoApprovedRoles: Role[] = [ROLES.STUDENT];
+
+    if (autoApprovedRoles.includes(role.name as Role)) {
+        this.approvalStatus = approvalStatus.APPROVED;
+    } else {
+        this.approvalStatus = approvalStatus.PENDING;
+    }
+
+    next();
+});
+
 userSchema.pre("save", async function (next) {
     if (!this.isModified("password")) return next();
 
@@ -152,7 +161,7 @@ userSchema.methods.comparePassword = async function (plainPassword: string) {
 
 userSchema.methods.generateAccessToken = function () {
     return jwt.sign(
-        { userId: this._id, role: this.role, permissions: this.permissions },
+        { userId: this._id, role: this.role, permissions: this.permissions, roleId: this.roleId },
         _config.JWT_ACCESS_TOKEN_SECRET as Secret,
         { expiresIn: _config.JWT_ACCESS_TOKEN_EXPIRES_IN as string } as SignOptions
     );

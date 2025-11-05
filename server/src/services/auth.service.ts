@@ -1,13 +1,14 @@
+import type { Request } from "express";
+import jwt from "jsonwebtoken";
+import _config from "src/configs/_config.js";
 import { ROLES } from "src/constants/roles.js";
+import CheckUserEmailAndBanned from "src/helpers/checkUserEmailAndBanned.js";
+import { Role } from "src/models/RoleAndPermissions/role.model.js";
 import User from "src/models/user.model.js";
 import { ApiError } from "src/utils/apiError.js";
 import { generateOtp } from "src/utils/generateOtp.js";
 import type { RegisterSchemaInput } from "src/validators/user.Schema.js";
 import emailService, { EmailType } from "./otp.service.js";
-import CheckUserEmailAndBanned from "src/helpers/checkUserEmailAndBanned.js";
-import jwt from "jsonwebtoken"
-import _config from "src/configs/_config.js";
-//Todo  --> implement store opt in hashed password if db leak than protects it
 
 const authService = {
     registerUserService: async (data: RegisterSchemaInput) => {
@@ -47,6 +48,15 @@ const authService = {
             });
         }
 
+        const roles = await Role.find()
+        const roleDoc = await Role.findOne({ name: data.role });
+        if (!roleDoc) {
+            throw new ApiError({
+                statusCode: 400,
+                message: "Invalid role selected",
+            });
+        }
+
         const { otp, expiry } = generateOtp();
         const profileData: Record<string, any> = {};
 
@@ -69,7 +79,7 @@ const authService = {
             name: data.name,
             email: data.email,
             password: data.password,
-            role: data.role,
+            roleId: roleDoc._id,
             phone: data.phone,
             address: data.address,
             verifyOtp: otp,
@@ -86,13 +96,31 @@ const authService = {
             message: "OTP sent to your email",
             userId: user._id,
             email: user.email,
-            role: user.role,
         };
     },
     sendRegisterOtpService: async (email: string) => {
-        const user = await User.findOne({ email }).select("+verifyOtp +verifyOtpExpiry");
+        const user = (await User.findOne({ email }).select("+verifyOtp +verifyOtpExpiry")) as any;
 
-        CheckUserEmailAndBanned(user)
+
+        if (!user) {
+            throw new ApiError({
+                statusCode: 404,
+                message: "User not found",
+                errors: [{ path: "email", message: "No account associated with this email" }],
+            });
+        }
+
+        if (user.isEmailVerified) {
+            CheckUserEmailAndBanned(user)
+        }
+
+        if (user.isEmailVerified) {
+            throw new ApiError({
+                statusCode: 400,
+                message: "Email is already verified",
+                errors: [{ path: "email", message: "Email is already verified" }],
+            });
+        }
 
         const { otp, expiry } = generateOtp();
 
@@ -105,10 +133,17 @@ const authService = {
         });
     },
     verifyRegisterOtpService: async (email: string, otp: string) => {
-        const user = await User.findOne({ email }).select("+verifyOtp +verifyOtpExpiry");
+        const user = (await User.findOne({ email }).select("+verifyOtp +verifyOtpExpiry")) as any;
 
         CheckUserEmailAndBanned(user)
 
+        if (user.isEmailVerified) {
+            throw new ApiError({
+                statusCode: 400,
+                message: "Email is already verified",
+                errors: [{ path: "email", message: "Email is already verified" }],
+            });
+        }
 
         if (String(user.verifyOtp) !== String(otp) || !user.verifyOtpExpiry || user.verifyOtpExpiry < new Date()) {
             throw new ApiError({
@@ -123,54 +158,26 @@ const authService = {
         user.verifyOtpExpiry = undefined;
         user.approvedBy = undefined
 
-        let accessToken: string | null = null;
-        let refreshToken: string | null = null;
-
-        // Generate tokens upon successful verification
-        if (user.role === ROLES.STUDENT) {
-            accessToken = user.generateAccessToken();
-            refreshToken = user.generateRefreshToken();
-        }
-
         await user.save();
 
         return {
             message: "Email verified successfully",
             userId: user._id,
             email: user.email,
-            role: user.role,
-            accessToken: accessToken,
-            refreshToken: refreshToken,
         };
     },
     loginUserService: async (email: string, password: string) => {
-        const user = await User.findOne({ email }).select("+password");
+        const user = (await User.findOne({ email }).select("+password"));
 
-        CheckUserEmailAndBanned(user)
-
-        if (user.role === ROLES.MANAGER && !user.isManagerApproved) {
+        if (!user.isEmailVerified) {
             throw new ApiError({
                 statusCode: 403,
-                message: "Your manager account is not approved",
-                errors: [{ path: "role", message: "Manager account is not approved" }],
+                message: "Email is not verified",
+                errors: [{ path: "email", message: "Please verify your email before logging in" }],
             });
-        }
 
-        if (user.role === ROLES.INSTRUCTOR && !user.isInstructorApproved) {
-            throw new ApiError({
-                statusCode: 403,
-                message: "Your instructor account is not approved",
-                errors: [{ path: "role", message: "Instructor account is not approved" }],
-            });
         }
-
-        if (user.role === ROLES.SUPPORT && !user.isSupportTeamApproved) {
-            throw new ApiError({
-                statusCode: 403,
-                message: "Your support team account is not approved",
-                errors: [{ path: "role", message: "Support team account is not approved" }],
-            });
-        }
+        CheckUserEmailAndBanned(user);
 
         const isPasswordValid = await user.comparePassword(password);
         if (!isPasswordValid) {
@@ -190,7 +197,6 @@ const authService = {
             message: "Login successful",
             userId: user._id,
             email: user.email,
-            role: user.role,
             isEmailVerified: user.isEmailVerified,
             permissions: user.permissions,
             approvalStatus: user.approvalStatus,
@@ -199,7 +205,7 @@ const authService = {
         };
     },
     sendResetPassOtpService: async (email: string) => {
-        const user = await User.findOne({ email });
+        const user = (await User.findOne({ email })) as any;
         CheckUserEmailAndBanned(user)
 
         const { otp, expiry } = generateOtp();
@@ -221,7 +227,7 @@ const authService = {
 
     },
     verifyResetPassOtpService: async (email: string, otp: string, newPassword: string) => {
-        const user = await User.findOne({ email }).select("+verifyOtp +verifyOtpExpiry +password");
+        const user = (await User.findOne({ email }).select("+verifyOtp +verifyOtpExpiry +password")) as any;
 
         CheckUserEmailAndBanned(user)
 
@@ -247,7 +253,7 @@ const authService = {
         };
     },
     changePasswordService: async (userId: string, currentPassword: string, newPassword: string) => {
-        const user = await User.findById(userId).select("+password");
+        const user = (await User.findById(userId).select("+password")) as any;
         CheckUserEmailAndBanned(user)
 
         const isPasswordValid = await user.comparePassword(currentPassword);
@@ -281,7 +287,7 @@ const authService = {
                 message: "Invalid refresh token",
             });
         }
-        const foundUser = await User.findById(user.userId).select("+refreshToken +accessToken");
+        const foundUser = (await User.findById(user.userId).select("+refreshToken +accessToken")) as any;
 
         if (!foundUser) {
             throw new ApiError({
@@ -312,7 +318,7 @@ const authService = {
                 message: "Invalid refresh token",
             });
         }
-        const foundUser = await User.findById(user.userId).select("+refreshToken +accessToken");
+        const foundUser = (await User.findById(user.userId).select("+refreshToken +accessToken")) as any;
 
         if (!foundUser) {
             throw new ApiError({
@@ -326,17 +332,34 @@ const authService = {
         foundUser.accessToken = undefined;
         await foundUser.save();
     },
-    getCurrentUserService: async (userId: string) => {
-        const user = await User.findById(userId).select("-password -verifyOtp -verifyOtpExpiry -refreshToken -accessToken");
+    getCurrentUserService: async (req: any) => {
+        const user = await User.findById(req.user.id)
+            .select("-password -verifyOtp -verifyOtpExpiry -refreshToken -accessToken")
+            .populate("roleId")
+            .lean();
+
         if (!user) {
             throw new ApiError({
                 statusCode: 404,
-                message: "User not found",
+                message: "User not found"
             });
         }
+
         return {
             message: "Current user fetched successfully",
-            user,
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                roleId: user.roleId?._id,
+                roleName: (user.roleId as any)?.name,
+                isEmailVerified: user.isEmailVerified,
+                approvalStatus: user.approvalStatus,
+                isBanned: user.isBanned,
+                permissions: req.user.permissions,
+                phone: user.phone,
+                address: user.address,
+            }
         };
     }
 };

@@ -7,7 +7,7 @@ declare global {
             role?: string;
             permissions?: string[];
             id?: UserDocument["_id"];
-            RolePermissions?: string[];
+            roleId?: UserDocument["roleId"];
         }
 
         interface Request {

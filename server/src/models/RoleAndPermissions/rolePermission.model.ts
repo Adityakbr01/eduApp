@@ -8,4 +8,4 @@ const rolePermissionSchema = new Schema(
     { timestamps: true }
 );
 
-export const RolePermission = model("RolePermission", rolePermissionSchema);
+export const RolePermissionModel = model("RolePermission", rolePermissionSchema);

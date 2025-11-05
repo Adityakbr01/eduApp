@@ -1,0 +1,44 @@
+{
+    "success": true,
+    "message": "Current user fetched successfully",
+    "data": {
+        "message": "Current user fetched successfully",
+        "user": {
+            "_id": "690b53e9c7b5b94cc49c18f7",
+            "name": "admin01",
+            "email": "admin1@gmail.com",
+            "roleId": "6905bbbc2a03e6c70abcd414",
+            "roleName": "admin",
+            "isEmailVerified": true,
+            "approvalStatus": "APPROVED",
+            "isBanned": false,
+            "permissions": [
+                "course:create",
+                "course:read",
+                "course:update",
+                "course:delete",
+                "course:manage",
+                "course:enroll",
+                "payment:process",
+                "payment:refund",
+                "payment:view",
+                "payment:history",
+                "payment:manage",
+                "user:create",
+                "user:read",
+                "user:update",
+                "user:delete",
+                "user:manage",
+                "student:read",
+                "student:support",
+                "self:read",
+                "self:update",
+                "self:delete"
+            ]
+        }
+    },
+    "meta": null,
+    "timestamp": "2025-11-05T13:54:24.713Z",
+    "path": "/api/v1/auth/me",
+    "statusCode": 200
+}
