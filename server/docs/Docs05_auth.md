@@ -10,8 +10,10 @@
    - refresh token ✅
    - get current user ✅
    - change password ✅
- - Building api for user management
- - Building api for user roles and permissions
+ - Building api for user, roles and permissions
+    - ADMIN & MANAGER
+     - Create, Read, Update, Delete users,Ban users ❌
+     - Assign and manage roles and permissions ❌
  - Building api for course management
  - Building api for course content management
  - Building api for progress tracking
