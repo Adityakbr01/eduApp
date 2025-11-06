@@ -42,6 +42,22 @@ const userController = {
             data: result.data,
         });
     }),
+    assignPermissions: wrapAsync(async (req, res) => {
+        const assignBy = req.user!.id;
+        const result = await userService.assignPermissions({ ...req.body }, assignBy);
+        ApiResponder.success(res, 200, "Permissions assigned successfully", {
+            message: result.message,
+            data: result.data,
+        });
+    }),
+    deletePermissions: wrapAsync(async (req, res) => {
+        const deleteBy = req.user!.id;
+        const result = await userService.deletePermissions({ ...req.body }, deleteBy);
+        ApiResponder.success(res, 200, "Permissions deleted successfully", {
+            message: result.message,
+            data: result.data,
+        });
+    }),
     approveUser: wrapAsync(async (req, res) => {
         const userId = req.params.id;
         const result = await userService.approveUser(userId, req.user!.id);

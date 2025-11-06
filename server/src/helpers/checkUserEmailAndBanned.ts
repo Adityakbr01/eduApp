@@ -3,29 +3,47 @@ import { ApiError } from "src/utils/apiError.js";
 
 function CheckUserEmailAndBanned(user: IUser) {
 
+    // ✅ User does not exist
     if (!user) {
         throw new ApiError({
             statusCode: 404,
-            message: "User not found",
-            errors: [{ path: "email", message: "No account associated with this email" }],
+            message: "Account not found",
+            errors: [
+                {
+                    path: "email",
+                    message: "No account exists with the provided email address"
+                }
+            ],
         });
     }
 
+    // ✅ Account pending approval
     if (!user.approvalStatus || user.approvalStatus === approvalStatusEnum.PENDING) {
         throw new ApiError({
             statusCode: 403,
-            message: "Your account is not approved yet",
-            errors: [{ path: "role", message: "Account is not approved yet" }],
+            message: "Your account is awaiting approval",
+            errors: [
+                {
+                    path: "approvalStatus",
+                    message: "Your account has not been reviewed or approved yet"
+                }
+            ],
         });
     }
 
+    // ✅ Banned account
     if (user.isBanned) {
         throw new ApiError({
             statusCode: 403,
-            message: "Your account is banned",
-            errors: [{ path: "email", message: "Email is banned" }],
+            message: "Your account has been suspended",
+            errors: [
+                {
+                    path: "email",
+                    message: "This email is linked to a suspended account"
+                }
+            ],
         });
     }
 }
 
-export default CheckUserEmailAndBanned
+export default CheckUserEmailAndBanned;

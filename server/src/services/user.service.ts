@@ -109,6 +109,91 @@ const userService = {
             data: rolesWithPermissions,
         };
     },
+    assignPermissions: async (assignData: { userId: string; permission: string[] }, assignBy: string) => {
+        const { userId, permission } = assignData;
+
+
+        if (assignBy.toString() === userId.toString()) {
+            throw new ApiError({
+                statusCode: 403,
+                message: "User cannot assign permissions to themselves",
+                errors: [
+                    { path: "user", message: "You cannot assign permissions to your own account" }
+                ]
+            });
+        }
+
+        const user = await User.findById(userId).exec();
+        if (!user) {
+            throw new ApiError({
+                statusCode: 404,
+                message: "User not found",
+                errors: [{ path: "user", message: "No user found with the given ID" }]
+            });
+        }
+
+        // ✅ FIX — get only permissions array
+        const { permissions: rolePermissions } = await getUserPermissions(user.roleId);
+
+        const existingPermissions = [
+            ...new Set([
+                ...(rolePermissions || []),
+                ...(user.permissions || [])
+            ])
+        ];
+
+        const newPermissions = permission.filter(p => !existingPermissions.includes(p));
+
+        if (newPermissions.length === 0) {
+            throw new ApiError({
+                statusCode: 400,
+                message: "User already has the given permissions",
+                errors: [{ path: "permissions", message: "User already has the given permissions" }]
+            });
+        }
+
+        user.permissions = [...user.permissions, ...newPermissions];
+        await user.save();
+
+        return {
+            message: "Permissions assigned successfully",
+            data: user,
+        };
+    },
+    deletePermissions: async (deleteData: { userId: string; permission: string[] }, deleteBy: string) => {
+        const { userId, permission } = deleteData;
+        if (deleteBy.toString() === userId.toString()) {
+            throw new ApiError({
+                statusCode: 403,
+                message: "User cannot delete permissions from themselves",
+                errors: [{ path: "user", message: "You cannot delete permissions from your own account" }]
+            });
+        }
+        const user = await User.findById(userId).exec();
+        if (!user) {
+            throw new ApiError({
+                statusCode: 404,
+                message: "User not found",
+                errors: [{ path: "user", message: "No user found with the given ID" }]
+            });
+        }
+        const updatedPermissions = (user.permissions || []).filter(p => !permission.includes(p));
+        if (updatedPermissions.length === user.permissions.length) {
+            throw new ApiError({
+                statusCode: 400,
+                message: "User does not have the given permissions",
+                errors: [{ path: "permissions", message: "User does not have the given permissions" }]
+            });
+        }
+
+        user.permissions = updatedPermissions;
+        await user.save();
+
+        return {
+            message: "Permissions deleted successfully",
+            data: user,
+        };
+    },
     approveUser: async (userId: string, approvedBy: string) => {
 
         const user = await User.findById(userId).exec();
