@@ -2,7 +2,7 @@ import type { Types } from "mongoose";
 import type { Role } from "src/constants/roles.js";
 
 
-export enum approvalStatus {
+export enum approvalStatusEnum {
     PENDING = "PENDING",
     APPROVED = "APPROVED",
     REJECTED = "REJECTED",
@@ -45,15 +45,12 @@ export interface IUser {
     phone?: string;
     address?: string;
 
-    approvalStatus?: approvalStatus;
+    approvalStatus?: approvalStatusEnum;
     approvedBy?: Types.ObjectId;
 
     permissions?: string[];
 
     isBanned: boolean;
-    isManagerApproved?: boolean;
-    isInstructorApproved?: boolean;
-    isSupportTeamApproved?: boolean;
 
     instructorProfile?: InstructorProfile;
     studentProfile?: StudentProfile;

@@ -8,4 +8,7 @@ const permissionSchema = new Schema(
     { timestamps: true }
 );
 
+permissionSchema.index({ code: 1 });
+
+
 export const Permission = model("Permission", permissionSchema);

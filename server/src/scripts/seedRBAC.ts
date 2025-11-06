@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 import _config from "src/configs/_config.js";
 
+import { RolePermissionModel } from "src/models/RoleAndPermissions/rolePermission.model.js";
 import { Permission } from "src/models/RoleAndPermissions/permission.model.js";
 import { Role } from "src/models/RoleAndPermissions/role.model.js";
-import { RolePermission } from "src/models/RoleAndPermissions/rolePermission.model.js";
 
 // ✅ Import constants
 import { PERMISSIONS } from "src/constants/permissions.js";
@@ -41,7 +41,7 @@ async function seedRBAC() {
             const rolePermissions = ROLE_PERMISSIONS[role] || [];
 
             for (const perm of rolePermissions) {
-                await RolePermission.findOneAndUpdate(
+                await RolePermissionModel.findOneAndUpdate(
                     { roleId: r._id, permissionId: permissionIdMap[perm] },
                     { roleId: r._id, permissionId: permissionIdMap[perm] },
                     { upsert: true }

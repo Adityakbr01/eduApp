@@ -28,7 +28,6 @@ const authController = {
         ApiResponder.success(res, 200, "User logged in successfully", {
             userId: result.userId,
             email: result.email,
-            role: result.role,
             isEmailVerified: result.isEmailVerified,
             permissions: result.permissions,
             approvalStatus: result.approvalStatus,

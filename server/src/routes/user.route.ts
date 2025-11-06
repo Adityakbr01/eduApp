@@ -6,13 +6,14 @@ import { validateSchema } from "src/middlewares/custom/validateSchema.js";
 import authMiddleware from "src/middlewares/user/authMiddleware.js";
 import checkPermission from "src/middlewares/user/checkPermission.js";
 import checkRole from "src/middlewares/user/checkRole.js";
-import { assignRoleSchema, updateUserSchema } from "src/validators/index.js";
+import { updateUserSchema } from "src/validators/index.js";
 const router = Router();
 
 
 router.use(authMiddleware);
 //Manage Permissions and Assign Roles
-router.get("/roles-permissions", userController.getRolesAndPermissions);
+router.get("/roles-permissions", checkRole(ROLES.ADMIN, ROLES.MANAGER), userController.getRolesAndPermissions);
+router.post("/approved-user/:id", checkRole(ROLES.ADMIN, ROLES.MANAGER), checkPermission(PERMISSIONS.USER_MANAGE), userController.approveUser);
 
 router.get("/", checkRole(ROLES.ADMIN, ROLES.MANAGER, ROLES.STUDENT), checkPermission(PERMISSIONS.USERS_READ), userController.getAllUsers);
 router.get("/:id", checkRole(ROLES.ADMIN, ROLES.MANAGER, ROLES.SUPPORT), checkPermission(PERMISSIONS.USER_READ), userController.getUserById);

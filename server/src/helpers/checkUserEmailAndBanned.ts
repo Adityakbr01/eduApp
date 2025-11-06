@@ -1,4 +1,4 @@
-import { approvalStatus, type IUser } from "src/types/user.model.Type.js";
+import { approvalStatusEnum, type IUser } from "src/types/user.model.Type.js";
 import { ApiError } from "src/utils/apiError.js";
 
 function CheckUserEmailAndBanned(user: IUser) {
@@ -11,7 +11,7 @@ function CheckUserEmailAndBanned(user: IUser) {
         });
     }
 
-    if (!user.approvalStatus || user.approvalStatus === approvalStatus.PENDING) {
+    if (!user.approvalStatus || user.approvalStatus === approvalStatusEnum.PENDING) {
         throw new ApiError({
             statusCode: 403,
             message: "Your account is not approved yet",

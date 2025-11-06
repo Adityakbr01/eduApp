@@ -42,3 +42,280 @@
     "path": "/api/v1/auth/me",
     "statusCode": 200
 }
+{
+    "success": true,
+    "message": "Current user fetched successfully",
+    "data": {
+        "message": "Current user fetched successfully",
+        "user": {
+            "_id": "690c05e0ccc477dd7f0bca30",
+            "name": "user1",
+            "email": "user1@gmail.com",
+            "roleId": "6905bbbc2a03e6c70abcd43b",
+            "roleName": "student",
+            "isEmailVerified": true,
+            "approvalStatus": "APPROVED",
+            "isBanned": false,
+            "permissions": [
+                "self:read",
+                "self:update",
+                "course:read",
+                "course:enroll",
+                "self:delete"
+            ]
+        }
+    },
+    "meta": null,
+    "timestamp": "2025-11-06T02:43:36.978Z",
+    "path": "/api/v1/auth/me",
+    "statusCode": 200
+},
+//Roles and Permissions
+{
+    "success": true,
+    "message": "Roles and permissions fetched successfully",
+    "data": {
+        "message": "Roles and permissions fetched successfully",
+        "data": [
+            {
+                "_id": "6905bbbc2a03e6c70abcd414",
+                "name": "admin",
+                "description": "admin role in system",
+                "permissions": [
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd403",
+                        "code": "course:manage",
+                        "description": "Permission: course:manage"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd404",
+                        "code": "course:enroll",
+                        "description": "Permission: course:enroll"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd405",
+                        "code": "payment:process",
+                        "description": "Permission: payment:process"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd407",
+                        "code": "payment:view",
+                        "description": "Permission: payment:view"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd408",
+                        "code": "payment:history",
+                        "description": "Permission: payment:history"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd409",
+                        "code": "payment:manage",
+                        "description": "Permission: payment:manage"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd40a",
+                        "code": "user:create",
+                        "description": "Permission: user:create"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd40b",
+                        "code": "user:read",
+                        "description": "Permission: user:read"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd40c",
+                        "code": "user:update",
+                        "description": "Permission: user:update"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd3ff",
+                        "code": "course:create",
+                        "description": "Permission: course:create"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd40d",
+                        "code": "user:delete",
+                        "description": "Permission: user:delete"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd40e",
+                        "code": "user:manage",
+                        "description": "Permission: user:manage"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd40f",
+                        "code": "student:read",
+                        "description": "Permission: student:read"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd410",
+                        "code": "student:support",
+                        "description": "Permission: student:support"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd411",
+                        "code": "self:read",
+                        "description": "Permission: self:read"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd412",
+                        "code": "self:update",
+                        "description": "Permission: self:update"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd413",
+                        "code": "self:delete",
+                        "description": "Permission: self:delete"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd400",
+                        "code": "course:read",
+                        "description": "Permission: course:read"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd406",
+                        "code": "payment:refund",
+                        "description": "Permission: payment:refund"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd401",
+                        "code": "course:update",
+                        "description": "Permission: course:update"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd402",
+                        "code": "course:delete",
+                        "description": "Permission: course:delete"
+                    }
+                ]
+            },
+            {
+                "_id": "6905bbbc2a03e6c70abcd42a",
+                "name": "manager",
+                "description": "manager role in system",
+                "permissions": [
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd408",
+                        "code": "payment:history",
+                        "description": "Permission: payment:history"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd40b",
+                        "code": "user:read",
+                        "description": "Permission: user:read"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd401",
+                        "code": "course:update",
+                        "description": "Permission: course:update"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd403",
+                        "code": "course:manage",
+                        "description": "Permission: course:manage"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd407",
+                        "code": "payment:view",
+                        "description": "Permission: payment:view"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd3ff",
+                        "code": "course:create",
+                        "description": "Permission: course:create"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd400",
+                        "code": "course:read",
+                        "description": "Permission: course:read"
+                    }
+                ]
+            },
+            {
+                "_id": "6905bbbc2a03e6c70abcd432",
+                "name": "instructor",
+                "description": "instructor role in system",
+                "permissions": [
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd40f",
+                        "code": "student:read",
+                        "description": "Permission: student:read"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd3ff",
+                        "code": "course:create",
+                        "description": "Permission: course:create"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd400",
+                        "code": "course:read",
+                        "description": "Permission: course:read"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd401",
+                        "code": "course:update",
+                        "description": "Permission: course:update"
+                    }
+                ]
+            },
+            {
+                "_id": "6905bbbc2a03e6c70abcd437",
+                "name": "support_team",
+                "description": "support_team role in system",
+                "permissions": [
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd40f",
+                        "code": "student:read",
+                        "description": "Permission: student:read"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd400",
+                        "code": "course:read",
+                        "description": "Permission: course:read"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd410",
+                        "code": "student:support",
+                        "description": "Permission: student:support"
+                    }
+                ]
+            },
+            {
+                "_id": "6905bbbc2a03e6c70abcd43b",
+                "name": "student",
+                "description": "student role in system",
+                "permissions": [
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd400",
+                        "code": "course:read",
+                        "description": "Permission: course:read"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd404",
+                        "code": "course:enroll",
+                        "description": "Permission: course:enroll"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd411",
+                        "code": "self:read",
+                        "description": "Permission: self:read"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd412",
+                        "code": "self:update",
+                        "description": "Permission: self:update"
+                    },
+                    {
+                        "_id": "6905bbbc2a03e6c70abcd413",
+                        "code": "self:delete",
+                        "description": "Permission: self:delete"
+                    }
+                ]
+            }
+        ]
+    },
+    "meta": null,
+    "timestamp": "2025-11-06T03:13:02.198Z",
+    "path": "/api/v1/users/roles-permissions",
+    "statusCode": 200
+}

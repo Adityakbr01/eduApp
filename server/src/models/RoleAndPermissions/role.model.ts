@@ -8,4 +8,5 @@ const roleSchema = new Schema(
     { timestamps: true }
 );
 
+roleSchema.index({ name: 1 });
 export const Role = model("Role", roleSchema);

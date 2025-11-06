@@ -3,7 +3,7 @@ import type { Secret, SignOptions } from "jsonwebtoken";
 import jwt from "jsonwebtoken";
 import { Schema, model } from "mongoose";
 import _config from "src/configs/_config.js";
-import { approvalStatus, type IUser } from "src/types/user.model.Type.js";
+import { approvalStatusEnum, type IUser } from "src/types/user.model.Type.js";
 import { ROLES, type Role } from "../constants/roles.js";
 import { Role as RoleSchema } from "./RoleAndPermissions/role.model.js";
 
@@ -62,8 +62,8 @@ const userSchema = new Schema<IUser>(
         // Approval Flow
         approvalStatus: {
             type: String,
-            enum: approvalStatus,
-            default: approvalStatus.PENDING, // will be overridden for student/admin
+            enum: approvalStatusEnum,
+            default: approvalStatusEnum.PENDING, // will be overridden for student/admin
         },
 
 
@@ -139,9 +139,9 @@ userSchema.pre("save", async function (next) {
     const autoApprovedRoles: Role[] = [ROLES.STUDENT];
 
     if (autoApprovedRoles.includes(role.name as Role)) {
-        this.approvalStatus = approvalStatus.APPROVED;
+        this.approvalStatus = approvalStatusEnum.APPROVED;
     } else {
-        this.approvalStatus = approvalStatus.PENDING;
+        this.approvalStatus = approvalStatusEnum.PENDING;
     }
 
     next();

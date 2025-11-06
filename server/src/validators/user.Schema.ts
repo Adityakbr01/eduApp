@@ -108,16 +108,10 @@ const updateUserSchema = z.object({
 
 
 
-//Manage Permissions and Assign Roles
-
-const assignRoleSchema = z.object({
-    role: RoleEnum,
-});
 
 
 
-export { registerSchema, loginSchema, registerOtpSchema, verifyOtpSchema, registerVerifyOtpSchema, changePasswordSchema, updateUserSchema, assignRoleSchema };
+export { registerSchema, loginSchema, registerOtpSchema, verifyOtpSchema, registerVerifyOtpSchema, changePasswordSchema, updateUserSchema };
 export type RegisterSchemaInput = z.infer<typeof registerSchema>;
 export type LoginSchemaInput = z.infer<typeof loginSchema>;
 
-export type AssignRoleSchemaInput = z.infer<typeof assignRoleSchema>;

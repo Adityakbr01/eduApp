@@ -8,4 +8,6 @@ const rolePermissionSchema = new Schema(
     { timestamps: true }
 );
 
+rolePermissionSchema.index({ roleId: 1, permissionId: 1 });
+
 export const RolePermissionModel = model("RolePermission", rolePermissionSchema);
