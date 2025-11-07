@@ -24,7 +24,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         PERMISSIONS.COURSE_CREATE,
         PERMISSIONS.COURSE_READ,
         PERMISSIONS.COURSE_UPDATE,
-
+        
         PERMISSIONS.STUDENT_READ,
     ],
 

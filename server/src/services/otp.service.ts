@@ -6,14 +6,14 @@ export enum EmailType {
     LOGIN_OTP = "LOGIN_OTP",
     WELCOME = "WELCOME",
     PASSWORD_RESET_OTP = "PASSWORD_RESET_OTP",
-
+    USER_APPROVAL = "USER_APPROVAL",
 }
 
 
 type EmailPayload =
-    | { email: string; otp: string } // VERIFY_OTP, LOGIN_OTP
-    | { email: string; name: string } // WELCOME
-    | { email: string; resetLink: string }; // PASSWORD_RESET
+    | { email: string; otp?: string } // VERIFY_OTP, LOGIN_OTP
+    | { email: string; name?: string } // WELCOME
+    | { email: string; resetLink?: string }; // PASSWORD_RESET
 
 
 const transporter = nodemailer.createTransport({
@@ -93,6 +93,42 @@ const templates = {
             </div>
         `,
     }),
+    [EmailType.USER_APPROVAL]: (data: { email: string; }) => ({
+        subject: "Your Account Has Been Approved ✅",
+        text: `Your account has been approved. You can now log in and use your dashboard.`,
+        html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                  max-width: 600px; margin: 0 auto; padding: 20px;
+                  background-color: #f9f9f9; border-radius: 8px;">
+          
+          <div style="background: #ffffff; border-radius: 8px; padding: 24px; 
+                      box-shadow: rgba(0,0,0,0.05) 0px 2px 6px;">
+              
+              <h2 style="color: #333333; margin: 0 0 12px; font-size: 22px; font-weight: 600;">
+                  Your Account Is Approved 🎉
+              </h2>
+
+              <p style="color: #555555; margin: 0 0 16px; line-height: 1.6; font-size: 15px;">
+                  Hi <strong>${data.email}</strong>,<br />
+                  Great news! Your account has been reviewed and approved.
+              </p>
+
+              <p style="color: #555555; margin: 0 0 20px; line-height: 1.6; font-size: 15px;">
+                  You can now log in and start accessing your dashboard and available features.
+              </p>
+
+              <p style="color: #999999; font-size: 13px; margin-top: 24px; text-align: center;">
+                  Approved on: ${Date.now().toLocaleString()}
+              </p>
+
+          </div>
+
+          <p style="color: #aaaaaa; font-size: 12px; margin-top: 16px; text-align: center;">
+              If you did not request this approval or need help, contact support.
+          </p>
+      </div>
+  `,
+    })
 };
 
 const emailService = {

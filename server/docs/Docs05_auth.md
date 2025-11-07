@@ -12,8 +12,8 @@
    - change password ✅
  - Building api for user, roles and permissions
     - ADMIN & MANAGER
-     - Create, Read, Update, Delete users,Ban users ❌
-     - Assign and manage roles and permissions ❌
+     - Read, Update( Ban users), Delete users, ✅
+     - Assign and manage permissions Approve user  ✅
  - Building api for course management
  - Building api for course content management
  - Building api for progress tracking

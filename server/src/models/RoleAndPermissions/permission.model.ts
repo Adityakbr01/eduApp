@@ -11,4 +11,4 @@ const permissionSchema = new Schema(
 permissionSchema.index({ code: 1 });
 
 
-export const Permission = model("Permission", permissionSchema);
+export const PermissionModel = model("Permission", permissionSchema);

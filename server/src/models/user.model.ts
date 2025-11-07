@@ -5,7 +5,7 @@ import { Schema, model } from "mongoose";
 import _config from "src/configs/_config.js";
 import { approvalStatusEnum, type IUser } from "src/types/user.model.Type.js";
 import { ROLES, type Role } from "../constants/roles.js";
-import { Role as RoleSchema } from "./RoleAndPermissions/role.model.js";
+import { RoleModel as RoleSchema } from "./RoleAndPermissions/role.model.js";
 
 
 const userSchema = new Schema<IUser>(
@@ -127,8 +127,6 @@ const userSchema = new Schema<IUser>(
     { timestamps: true }
 );
 
-
-
 // set approvalStatus based on role
 userSchema.pre("save", async function (next) {
     if (!this.isModified("roleId")) return next();
@@ -176,7 +174,7 @@ userSchema.methods.generateRefreshToken = function () {
 };
 
 
-const User = model("User", userSchema);
+const UserModel = model("User", userSchema);
 
 
-export default User;
+export default UserModel;

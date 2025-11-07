@@ -2,26 +2,27 @@ import mongoose from "mongoose";
 import _config from "src/configs/_config.js";
 
 import { RolePermissionModel } from "src/models/RoleAndPermissions/rolePermission.model.js";
-import { Permission } from "src/models/RoleAndPermissions/permission.model.js";
-import { Role } from "src/models/RoleAndPermissions/role.model.js";
+import { PermissionModel } from "src/models/RoleAndPermissions/permission.model.js";
+import { RoleModel } from "src/models/RoleAndPermissions/role.model.js";
 
 // ✅ Import constants
 import { PERMISSIONS } from "src/constants/permissions.js";
 import { ROLES } from "src/constants/roles.js";
 import { ROLE_PERMISSIONS } from "src/constants/rolePermissions.js";
+import logger from "src/helpers/logger.js";
 
 async function seedRBAC() {
     try {
-        console.log("🚀 Connecting DB...");
+        logger.info("🚀 Connecting DB...");
         await mongoose.connect(_config.MONGO_URI);
-        console.log("✅ DB connected\n");
+        logger.info("✅ DB connected\n");
 
         // ✅ Insert Permissions
-        console.log("📌 Seeding Permissions...");
+        logger.info("📌 Seeding Permissions...");
         const permissionIdMap = {};
 
         for (const permission of Object.values(PERMISSIONS)) {
-            const p = await Permission.findOneAndUpdate(
+            const p = await PermissionModel.findOneAndUpdate(
                 { code: permission },
                 { code: permission, description: `Permission: ${permission}` },
                 { upsert: true, new: true }
@@ -30,9 +31,9 @@ async function seedRBAC() {
         }
 
         // ✅ Insert Roles & Map Permissions
-        console.log("\n📌 Seeding Roles & Mapping Permissions...");
+        logger.info("\n📌 Seeding Roles & Mapping Permissions...");
         for (const role of Object.values(ROLES)) {
-            const r = await Role.findOneAndUpdate(
+            const r = await RoleModel.findOneAndUpdate(
                 { name: role },
                 { name: role, description: `${role} role in system` },
                 { upsert: true, new: true }
@@ -49,10 +50,10 @@ async function seedRBAC() {
             }
         }
 
-        console.log("\n✅ RBAC Seed Complete!");
+        logger.info("\n✅ RBAC Seed Complete!");
         process.exit(0);
     } catch (err) {
-        console.error("❌ Seeder Error:", err);
+        logger.error("❌ Seeder Error:", err);
         process.exit(1);
     }
 }

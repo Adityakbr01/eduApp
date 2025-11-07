@@ -9,4 +9,4 @@ const roleSchema = new Schema(
 );
 
 roleSchema.index({ name: 1 });
-export const Role = model("Role", roleSchema);
+export const RoleModel = model("Role", roleSchema);

@@ -12,7 +12,6 @@ const router = Router();
 
 router.use(authMiddleware);
 //Manage Permissions and Assign Roles
-
 //@desc GET ROLES AND PERMISSIONS
 router.get("/roles-permissions", checkRole(ROLES.ADMIN, ROLES.MANAGER), userController.getRolesAndPermissions);
 //@desc ASSIGN PERMISSIONS
@@ -23,12 +22,11 @@ router.delete("/roles-permissions", checkRole(ROLES.ADMIN, ROLES.MANAGER), check
 router.post("/approved-user/:id", checkRole(ROLES.ADMIN, ROLES.MANAGER), checkPermission(PERMISSIONS.USER_MANAGE), userController.approveUser);
 //Todo : --> add assign permission
 
-router.get("/", checkRole(ROLES.ADMIN, ROLES.MANAGER, ROLES.STUDENT), checkPermission(PERMISSIONS.USERS_READ), userController.getAllUsers);
+// CRUD Users
+router.get("/", checkRole(ROLES.ADMIN, ROLES.MANAGER), checkPermission(PERMISSIONS.USERS_READ), userController.getAllUsers);
 router.get("/:id", checkRole(ROLES.ADMIN, ROLES.MANAGER, ROLES.SUPPORT), checkPermission(PERMISSIONS.USER_READ), userController.getUserById);
-router.put("/:id", validateSchema(updateUserSchema), checkRole(ROLES.ADMIN, ROLES.MANAGER), checkPermission(PERMISSIONS.USER_UPDATE), userController.updateUserById);
+router.put("/:id", validateSchema(updateUserSchema), checkRole(ROLES.ADMIN, ROLES.MANAGER, ROLES.SUPPORT), checkPermission(PERMISSIONS.USER_UPDATE), userController.updateUserById);
 router.delete("/:id", checkRole(ROLES.ADMIN, ROLES.MANAGER), checkPermission(PERMISSIONS.USER_DELETE), userController.deleteUserById);
-
-
 
 
 export default router;

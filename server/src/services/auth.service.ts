@@ -1,24 +1,37 @@
-import type { Request } from "express";
 import jwt from "jsonwebtoken";
+import emailQueue from "src/bull/queues/email.queue.js";
+import { addEmailJob, EMAIL_JOB_Names } from "src/bull/workers/email.worker.js";
 import _config from "src/configs/_config.js";
 import { ROLES } from "src/constants/roles.js";
 import CheckUserEmailAndBanned from "src/helpers/checkUserEmailAndBanned.js";
-import { Role } from "src/models/RoleAndPermissions/role.model.js";
+import { RoleModel } from "src/models/RoleAndPermissions/role.model.js";
 import User from "src/models/user.model.js";
 import { ApiError } from "src/utils/apiError.js";
-import { generateOtp } from "src/utils/generateOtp.js";
+import { generateOtp, verifyOtpHash } from "src/utils/OtpUtils.js";
 import type { RegisterSchemaInput } from "src/validators/user.Schema.js";
-import emailService, { EmailType } from "./otp.service.js";
 
 const authService = {
     registerUserService: async (data: RegisterSchemaInput) => {
-        const existingUser = await User.findOne({ email: data.email });
+
+        const userAgg = await User.aggregate([
+            { $match: { email: data.email } },
+            {
+                $project: {
+                    email: 1,
+                    isEmailVerified: 1,
+                    isBanned: 1,
+                    verifyOtp: 1,
+                    verifyOtpExpiry: 1
+                }
+            }
+        ]);
+
+        const existingUser = userAgg[0];
 
         if (existingUser && existingUser.isEmailVerified && !existingUser.isBanned) {
             throw new ApiError({
                 statusCode: 400,
                 message: "Account already exists. Please login.",
-                errors: [{ path: "email", message: "Email already registered" }],
             });
         }
 
@@ -26,20 +39,26 @@ const authService = {
             throw new ApiError({
                 statusCode: 403,
                 message: "Your account is banned",
-                errors: [{ path: "email", message: "Email is banned" }],
             });
         }
 
+        // OTP generate + hash
+        const { otp, hashedOtp, expiry } = await generateOtp();
+
         if (existingUser && !existingUser.isEmailVerified) {
-            const { otp, expiry } = generateOtp();
+            await User.updateOne(
+                { email: data.email },
+                {
+                    $set: {
+                        verifyOtp: hashedOtp,
+                        verifyOtpExpiry: expiry
+                    }
+                }
+            );
 
-            existingUser.verifyOtp = otp;
-            existingUser.verifyOtpExpiry = expiry;
-            await existingUser.save();
-
-            await emailService.sendEmail(EmailType.VERIFY_OTP, {
+            await addEmailJob(emailQueue, EMAIL_JOB_Names.REGISTER_OTP, {
                 email: existingUser.email,
-                otp,
+                otp
             });
 
             throw new ApiError({
@@ -48,8 +67,7 @@ const authService = {
             });
         }
 
-        const roles = await Role.find()
-        const roleDoc = await Role.findOne({ name: data.role });
+        const roleDoc = await RoleModel.findOne({ name: data.role });
         if (!roleDoc) {
             throw new ApiError({
                 statusCode: 400,
@@ -57,21 +75,20 @@ const authService = {
             });
         }
 
-        const { otp, expiry } = generateOtp();
-        const profileData: Record<string, any> = {};
+        const profileData: any = {};
 
         if (data.role === ROLES.INSTRUCTOR) {
-            profileData.instructorProfile = (data as any).instructorProfile;
+            profileData.instructorProfile = data.instructorProfile;
             profileData.isInstructorApproved = false;
         }
 
         if (data.role === ROLES.MANAGER) {
-            profileData.managerProfile = (data as any).managerProfile;
+            profileData.managerProfile = data.managerProfile;
             profileData.isManagerApproved = false;
         }
 
         if (data.role === ROLES.SUPPORT) {
-            profileData.supportTeamProfile = (data as any).supportTeamProfile;
+            profileData.supportTeamProfile = data.supportTeamProfile;
             profileData.isSupportTeamApproved = false;
         }
 
@@ -82,12 +99,12 @@ const authService = {
             roleId: roleDoc._id,
             phone: data.phone,
             address: data.address,
-            verifyOtp: otp,
+            verifyOtp: hashedOtp,
             verifyOtpExpiry: expiry,
             ...profileData,
         });
 
-        await emailService.sendEmail(EmailType.VERIFY_OTP, {
+        await addEmailJob(emailQueue, EMAIL_JOB_Names.REGISTER_OTP, {
             email: user.email,
             otp,
         });
@@ -122,48 +139,63 @@ const authService = {
             });
         }
 
-        const { otp, expiry } = generateOtp();
+        const { otp, hashedOtp, expiry } = await generateOtp();
 
-        user.verifyOtp = otp;
+        user.verifyOtp = hashedOtp;
         user.verifyOtpExpiry = expiry;
         await user.save();
-        await emailService.sendEmail(EmailType.VERIFY_OTP, {
+
+        await addEmailJob(emailQueue, EMAIL_JOB_Names.REGISTER_OTP, {
             email: user.email,
             otp,
         });
     },
     verifyRegisterOtpService: async (email: string, otp: string) => {
-        const user = (await User.findOne({ email }).select("+verifyOtp +verifyOtpExpiry")) as any;
+        const user = await User.findOne({ email }).select(
+            "+verifyOtp +verifyOtpExpiry"
+        ) as any;
 
-        CheckUserEmailAndBanned(user)
+        CheckUserEmailAndBanned(user);
 
         if (user.isEmailVerified) {
             throw new ApiError({
                 statusCode: 400,
                 message: "Email is already verified",
-                errors: [{ path: "email", message: "Email is already verified" }],
+                errors: [{ path: "email", message: "Email is already verified" }]
             });
         }
 
-        if (String(user.verifyOtp) !== String(otp) || !user.verifyOtpExpiry || user.verifyOtpExpiry < new Date()) {
+        // Expiry check
+        if (!user.verifyOtpExpiry || user.verifyOtpExpiry < new Date()) {
             throw new ApiError({
                 statusCode: 400,
                 message: "Invalid or expired OTP",
-                errors: [{ path: "otp", message: "Invalid or expired OTP" }],
+                errors: [{ path: "otp", message: "OTP expired" }]
             });
         }
 
+        // Hash compare (actual OTP matching)
+        const isValidOtp = await verifyOtpHash(otp, user.verifyOtp);
+        if (!isValidOtp) {
+            throw new ApiError({
+                statusCode: 400,
+                message: "Invalid or expired OTP",
+                errors: [{ path: "otp", message: "Invalid OTP" }]
+            });
+        }
+
+        // Mark verified
         user.isEmailVerified = true;
         user.verifyOtp = undefined;
         user.verifyOtpExpiry = undefined;
-        user.approvedBy = undefined
+        user.approvedBy = undefined;
 
         await user.save();
 
         return {
             message: "Email verified successfully",
             userId: user._id,
-            email: user.email,
+            email: user.email
         };
     },
     loginUserService: async (email: string, password: string) => {
@@ -208,12 +240,12 @@ const authService = {
         const user = (await User.findOne({ email })) as any;
         CheckUserEmailAndBanned(user)
 
-        const { otp, expiry } = generateOtp();
+        const { otp, hashedOtp, expiry } = await generateOtp();
 
-        user.verifyOtp = otp;
+        user.verifyOtp = hashedOtp;
         user.verifyOtpExpiry = expiry;
         await user.save();
-        await emailService.sendEmail(EmailType.PASSWORD_RESET_OTP, {
+        await addEmailJob(emailQueue, EMAIL_JOB_Names.RESET_PASS_OTP, {
             email: user.email,
             otp,
         });
@@ -227,29 +259,43 @@ const authService = {
 
     },
     verifyResetPassOtpService: async (email: string, otp: string, newPassword: string) => {
-        const user = (await User.findOne({ email }).select("+verifyOtp +verifyOtpExpiry +password")) as any;
+        const user = await User.findOne({ email }).select(
+            "+verifyOtp +verifyOtpExpiry +password"
+        ) as any;
 
-        CheckUserEmailAndBanned(user)
+        CheckUserEmailAndBanned(user);
 
-
-        if (String(user.verifyOtp) !== String(otp) || !user.verifyOtpExpiry || user.verifyOtpExpiry < new Date()) {
+        // Expiry check
+        if (!user.verifyOtpExpiry || user.verifyOtpExpiry < new Date()) {
             throw new ApiError({
                 statusCode: 400,
                 message: "Invalid or expired OTP",
-                errors: [{ path: "otp", message: "Invalid or expired OTP" }],
+                errors: [{ path: "otp", message: "OTP expired" }]
             });
         }
 
+        // Compare hashed OTP
+        const isValidOtp = await verifyOtpHash(otp, user.verifyOtp);
+        if (!isValidOtp) {
+            throw new ApiError({
+                statusCode: 400,
+                message: "Invalid or expired OTP",
+                errors: [{ path: "otp", message: "Invalid OTP" }]
+            });
+        }
+
+        // Update password (mongoose pre-save hook will hash)
+        user.password = newPassword;
         user.verifyOtp = undefined;
         user.verifyOtpExpiry = undefined;
-        user.password = newPassword
+
         await user.save();
 
         return {
             message: "Password reset successfully",
             userId: user._id,
             email: user.email,
-            role: user.role,
+            role: user.role
         };
     },
     changePasswordService: async (userId: string, currentPassword: string, newPassword: string) => {

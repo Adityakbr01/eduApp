@@ -34,6 +34,7 @@ const userController = {
             data: result.data,
         });
     }),
+    
     // Roles and Permissions
     getRolesAndPermissions: wrapAsync(async (req, res) => {
         const result = await userService.getRolesAndPermissions();

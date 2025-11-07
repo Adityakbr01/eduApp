@@ -1,7 +1,8 @@
 import { Types } from "mongoose";
+import emailQueue from "src/bull/queues/email.queue.js";
+import { addEmailJob, EMAIL_JOB_Names } from "src/bull/workers/email.worker.js";
 import { getUserPermissions } from "src/middlewares/user/getUserPermissions.js";
-import { Role } from "src/models/RoleAndPermissions/role.model.js";
-import { RolePermissionModel } from "src/models/RoleAndPermissions/rolePermission.model.js";
+import { RoleModel } from "src/models/RoleAndPermissions/role.model.js";
 import User from "src/models/user.model.js";
 import { approvalStatusEnum } from "src/types/user.model.Type.js";
 import { ApiError } from "src/utils/apiError.js";
@@ -64,7 +65,7 @@ const userService = {
         };
     },
     getRolesAndPermissions: async () => {
-        const rolesWithPermissions = await Role.aggregate([
+        const rolesWithPermissions = await RoleModel.aggregate([
             // 1️⃣ Join RolePermission to get permissions for each role
             {
                 $lookup: {
@@ -221,6 +222,9 @@ const userService = {
             });
         }
 
+        await addEmailJob(emailQueue, EMAIL_JOB_Names.ACCOUNT_APPROVAL, {
+            to: user.email,
+        });
         user.approvalStatus = approvalStatusEnum.APPROVED;
         user.approvedBy = new Types.ObjectId(approvedBy);
         await user.save();

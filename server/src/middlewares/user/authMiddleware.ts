@@ -14,7 +14,6 @@ const authMiddleware = async (req: Request, res: Response, next: NextFunction) =
 
         const decoded = jwt.verify(token, _config.JWT_ACCESS_TOKEN_SECRET) as JwtPayload;
 
-        console.log("Decoded JWT:", decoded);
 
         const rolePermissions = await getUserPermissions(decoded.roleId);
 
@@ -24,8 +23,6 @@ const authMiddleware = async (req: Request, res: Response, next: NextFunction) =
             permissions: [...rolePermissions.permissions, ...(decoded.permissions || [])],
             roleId: decoded.roleId,
         };
-
-        console.log("Authenticated User:", req.user);
 
         next();
     } catch (error: any) {
