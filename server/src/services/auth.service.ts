@@ -20,28 +20,33 @@ const USER_CACHE_TTL = TTL.USER_PROFILE;
 const authService = {
     registerUserService: async (data: RegisterSchemaInput) => {
 
+        // ✅ Step 1: Email OR Phone match
         const userAgg = await User.aggregate([
-            { $match: { email: data.email } },
+            {
+                $match: {
+                    $or: [
+                        { email: data.email },
+                        { phone: data.phone }
+                    ]
+                }
+            },
             {
                 $project: {
                     email: 1,
+                    phone: 1,
                     isEmailVerified: 1,
                     isBanned: 1,
                     verifyOtp: 1,
-                    verifyOtpExpiry: 1
+                    verifyOtpExpiry: 1,
                 }
             }
         ]);
 
         const existingUser = userAgg[0];
 
-        if (existingUser && existingUser.isEmailVerified && !existingUser.isBanned) {
-            throw new ApiError({
-                statusCode: 400,
-                message: "Account already exists. Please login.",
-            });
-        }
+        console.log("Existing user:", existingUser);
 
+        // ✅ Step 2: If user is banned
         if (existingUser && existingUser.isBanned) {
             throw new ApiError({
                 statusCode: 403,
@@ -49,31 +54,43 @@ const authService = {
             });
         }
 
-        // OTP generate + hash
-        const { otp, hashedOtp, expiry } = await generateOtp();
-
+        // ✅ Step 3: If user exists but NOT verified → resend OTP
         if (existingUser && !existingUser.isEmailVerified) {
+
+            CheckUserEmailAndBanned(existingUser);
+
+            const { otp, hashedOtp, expiry } = await generateOtp();
+
+
             await User.updateOne(
-                { email: data.email },
+                { email: existingUser.email },
                 {
-                    $set: {
-                        verifyOtp: hashedOtp,
-                        verifyOtpExpiry: expiry
-                    }
+                    verifyOtp: hashedOtp,
+                    verifyOtpExpiry: expiry
                 }
             );
 
             await addEmailJob(emailQueue, EMAIL_JOB_Names.REGISTER_OTP, {
                 email: existingUser.email,
-                otp
+                otp,
             });
 
+            return {
+                message: "Account already exists but email is not verified. OTP resent.",
+                email: existingUser.email,
+                userId: existingUser._id,
+            };
+        }
+
+        // ✅ Step 4: If user exists AND verified → block
+        if (existingUser && existingUser.isEmailVerified) {
             throw new ApiError({
                 statusCode: 400,
-                message: "Account already exists. Please verify OTP sent to your email.",
+                message: "Account already exists. Please login.",
             });
         }
 
+        // ✅ Step 5: Now handle brand new registration
         const roleDoc = await RoleModel.findOne({ name: data.role });
         if (!roleDoc) {
             throw new ApiError({
@@ -81,6 +98,8 @@ const authService = {
                 message: "Invalid role selected",
             });
         }
+
+        const { otp, hashedOtp, expiry } = await generateOtp();
 
         const profileData: any = {};
 
@@ -111,21 +130,15 @@ const authService = {
             ...profileData,
         });
 
-        await addEmailJob(emailQueue, EMAIL_JOB_Names.REGISTER_OTP, {
-            email: user.email,
-            otp,
-        });
-
-        // Invalidate any stale cache for this user id (safe no-op if not present)
-        try {
-            await cacheManager.del(cacheKeyFactory.user.byId(String(user._id)));
-        } catch (err) {
-            // non-fatal: don't fail registration due to cache issues
-            logger.warn("cache.del failed during registerUserService:", err);
+        if (roleDoc.name === ROLES.STUDENT) {
+            await addEmailJob(emailQueue, EMAIL_JOB_Names.REGISTER_OTP, {
+                email: user.email,
+                otp,
+            });
         }
 
         return {
-            message: "OTP sent to your email",
+            message: roleDoc.name === ROLES.STUDENT ? "OTP sent to your email" : "Registration successful . Awaiting approval from admin",
             userId: user._id,
             email: user.email,
         };
@@ -142,9 +155,8 @@ const authService = {
             });
         }
 
-        if (user.isEmailVerified) {
-            CheckUserEmailAndBanned(user)
-        }
+        CheckUserEmailAndBanned(user)
+
 
         if (user.isEmailVerified) {
             throw new ApiError({

@@ -21,7 +21,7 @@ function CheckUserEmailAndBanned(user: IUser) {
     if (!user.approvalStatus || user.approvalStatus === approvalStatusEnum.PENDING) {
         throw new ApiError({
             statusCode: 403,
-            message: "Your account is awaiting approval",
+            message: "Your account is awaiting for approval",
             errors: [
                 {
                     path: "approvalStatus",
