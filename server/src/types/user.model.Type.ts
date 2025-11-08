@@ -36,8 +36,6 @@ export interface IUser {
     password: string;
     roleId: Types.ObjectId;
 
-    accessToken?: string;
-    refreshToken?: string;
     verifyOtp?: string;
     verifyOtpExpiry?: Date;
 

@@ -166,6 +166,10 @@ Note : Ye Documentation AI se generate kiya gaya hai, isme kuch grammatical ya f
 
 
 ### Next steps
+ - Adding Single Device Login using Redis and JWT tokens ✅
+ - 
+
+### Next steps 2
  - Building RBAC (Role-Based Access Control) system ✅
  - Building api for authentication 
    - Register User ✅

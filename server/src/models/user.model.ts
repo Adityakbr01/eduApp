@@ -20,17 +20,6 @@ const userSchema = new Schema<IUser>(
             required: true,
         },
 
-        //JWT & Verification
-        accessToken: {
-            type: String,
-            select: false,
-            required: false,
-        },
-        refreshToken: {
-            type: String,
-            select: false,
-            required: false,
-        },
         //all Otp store and expiry , e.g for verify email , reset password etc.
         verifyOtp: {
             type: String,

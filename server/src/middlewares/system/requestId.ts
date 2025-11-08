@@ -3,7 +3,7 @@ import { type Request, type Response, type NextFunction } from "express";
 
 export function requestId(req: Request, res: Response, next: NextFunction) {
     const id = uuid();
-    req.id = id;
+    req.user.id = id;
     res.setHeader("X-Request-ID", id);
     next();
 }

@@ -25,7 +25,6 @@ async function startServer() {
         await connectToDatabase();
         logger.info("✅ MongoDB connected");
 
-        // ✅ Start BullMQ Workers automatically
         startWorkers();
         logger.info("✅ All workers active");
 
@@ -42,7 +41,6 @@ async function startServer() {
 
 startServer();
 
-// ✅ Graceful Shutdown
 async function gracefulShutdown(signal) {
     logger.warn(`⏳ Received ${signal}, shutting down gracefully...`);
 

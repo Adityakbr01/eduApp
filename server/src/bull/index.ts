@@ -10,7 +10,7 @@ export function startWorkers() {
 }
 
 export async function stopWorkers() {
-    console.log("⏳ Stopping workers...");
+    logger.info("⏳ Stopping workers...");
 
     try {
         for (const worker of ALL_WORKERS) {
@@ -18,8 +18,8 @@ export async function stopWorkers() {
                 await worker.close();
             }
         }
-        console.log("✅ Workers stopped");
+        logger.info("✅ Workers stopped");
     } catch (err) {
-        console.log("❌ Error stopping workers", err);
+        logger.error("❌ Error stopping workers", err);
     }
 }

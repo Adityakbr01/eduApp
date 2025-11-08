@@ -1,6 +1,9 @@
 import jwt from "jsonwebtoken";
 import emailQueue from "src/bull/queues/email.queue.js";
 import { addEmailJob, EMAIL_JOB_Names } from "src/bull/workers/email.worker.js";
+import { cacheKeyFactory } from "src/cache/cacheKeyFactory.js";
+import cacheManager from "src/cache/cacheManager.js";
+import { TTL } from "src/cache/cacheTTL.js";
 import _config from "src/configs/_config.js";
 import { ROLES } from "src/constants/roles.js";
 import CheckUserEmailAndBanned from "src/helpers/checkUserEmailAndBanned.js";
@@ -9,6 +12,10 @@ import User from "src/models/user.model.js";
 import { ApiError } from "src/utils/apiError.js";
 import { generateOtp, verifyOtpHash } from "src/utils/OtpUtils.js";
 import type { RegisterSchemaInput } from "src/validators/user.Schema.js";
+import { sessionService } from "./index.js";
+import logger from "src/helpers/logger.js";
+
+const USER_CACHE_TTL = TTL.USER_PROFILE;
 
 const authService = {
     registerUserService: async (data: RegisterSchemaInput) => {
@@ -109,6 +116,14 @@ const authService = {
             otp,
         });
 
+        // Invalidate any stale cache for this user id (safe no-op if not present)
+        try {
+            await cacheManager.del(cacheKeyFactory.user.byId(String(user._id)));
+        } catch (err) {
+            // non-fatal: don't fail registration due to cache issues
+            logger.warn("cache.del failed during registerUserService:", err);
+        }
+
         return {
             message: "OTP sent to your email",
             userId: user._id,
@@ -149,6 +164,13 @@ const authService = {
             email: user.email,
             otp,
         });
+
+        // optional: invalidate cached user view when OTP/state changes
+        try {
+            await cacheManager.del(cacheKeyFactory.user.byId(String(user._id)));
+        } catch (err) {
+            logger.warn("cache.del failed during sendRegisterOtpService:", err);
+        }
     },
     verifyRegisterOtpService: async (email: string, otp: string) => {
         const user = await User.findOne({ email }).select(
@@ -192,6 +214,13 @@ const authService = {
 
         await user.save();
 
+        // invalidate cached user after email verification
+        try {
+            await cacheManager.del(cacheKeyFactory.user.byId(String(user._id)));
+        } catch (err) {
+            logger.warn("cache.del failed during verifyRegisterOtpService:", err);
+        }
+
         return {
             message: "Email verified successfully",
             userId: user._id,
@@ -199,7 +228,15 @@ const authService = {
         };
     },
     loginUserService: async (email: string, password: string) => {
-        const user = (await User.findOne({ email }).select("+password"));
+        const user = await User.findOne({ email }).select("+password");
+
+        if (!user) {
+            throw new ApiError({
+                statusCode: 404,
+                message: "User not found",
+                errors: [{ path: "email", message: "Account does not exist" }],
+            });
+        }
 
         if (!user.isEmailVerified) {
             throw new ApiError({
@@ -207,8 +244,8 @@ const authService = {
                 message: "Email is not verified",
                 errors: [{ path: "email", message: "Please verify your email before logging in" }],
             });
-
         }
+
         CheckUserEmailAndBanned(user);
 
         const isPasswordValid = await user.comparePassword(password);
@@ -220,10 +257,25 @@ const authService = {
             });
         }
 
-        user.accessToken = user.generateAccessToken();
-        user.refreshToken = user.generateRefreshToken();
-        await user.save();
 
+        const accessToken = user.generateAccessToken();
+        const refreshToken = user.generateRefreshToken();
+
+        try {
+            await sessionService.createSession(String(user._id), refreshToken);
+        } catch (err) {
+            logger.error("Failed to create session in Redis:", err);
+            throw new ApiError({
+                statusCode: 500,
+                message: "Failed to create session. Please try again.",
+            });
+        }
+
+        try {
+            await cacheManager.del(cacheKeyFactory.user.byId(String(user._id)));
+        } catch (err) {
+            logger.warn("cache.del failed during loginUserService:", err);
+        }
 
         return {
             message: "Login successful",
@@ -232,8 +284,8 @@ const authService = {
             isEmailVerified: user.isEmailVerified,
             permissions: user.permissions,
             approvalStatus: user.approvalStatus,
-            accessToken: user.accessToken,
-            refreshToken: user.refreshToken,
+            accessToken,
+            refreshToken,
         };
     },
     sendResetPassOtpService: async (email: string) => {
@@ -249,6 +301,13 @@ const authService = {
             email: user.email,
             otp,
         });
+
+        // invalidate cached user (safe no-op)
+        try {
+            await cacheManager.del(cacheKeyFactory.user.byId(String(user._id)));
+        } catch (err) {
+            logger.warn("cache.del failed during sendResetPassOtpService:", err);
+        }
 
         return {
             message: "Password reset otp sent successfully",
@@ -291,8 +350,22 @@ const authService = {
 
         await user.save();
 
+        // Invalidate session after password reset (security measure)
+        try {
+            await sessionService.deleteSession(String(user._id));
+        } catch (err) {
+            logger.error("Failed to delete session after password reset:", err);
+        }
+
+        // Invalidate cached user after password reset
+        try {
+            await cacheManager.del(cacheKeyFactory.user.byId(String(user._id)));
+        } catch (err) {
+            logger.warn("cache.del failed during verifyResetPassOtpService:", err);
+        }
+
         return {
-            message: "Password reset successfully",
+            message: "Password reset successfully. Please login with your new password.",
             userId: user._id,
             email: user.email,
             role: user.role
@@ -310,10 +383,26 @@ const authService = {
                 errors: [{ path: "currentPassword", message: "Current password is incorrect" }],
             });
         }
+
         user.password = newPassword;
         await user.save();
+
+        // Invalidate session when password changes (security best practice)
+        try {
+            await sessionService.deleteSession(userId);
+        } catch (err) {
+            logger.error("Failed to delete session after password change:", err);
+        }
+
+        // Invalidate cached user after password change
+        try {
+            await cacheManager.del(cacheKeyFactory.user.byId(String(user._id)));
+        } catch (err) {
+            logger.warn("cache.del failed during changePasswordService:", err);
+        }
+
         return {
-            message: "Password changed successfully",
+            message: "Password changed successfully. Please login again.",
             userId: user._id,
             email: user.email,
             role: user.role,
@@ -326,14 +415,39 @@ const authService = {
                 message: "Refresh token missing",
             });
         }
-        const user = jwt.verify(refreshToken, _config.JWT_REFRESH_TOKEN_SECRET!) as { userId: string };
-        if (!user) {
+
+        // Step 1: Verify JWT signature (stateless)
+        let decoded: { userId: string };
+        try {
+            decoded = jwt.verify(
+                refreshToken,
+                _config.JWT_REFRESH_TOKEN_SECRET!
+            ) as { userId: string };
+        } catch (err) {
+            throw new ApiError({
+                statusCode: 401,
+                message: "Invalid or expired refresh token",
+            });
+        }
+
+        if (!decoded?.userId) {
             throw new ApiError({
                 statusCode: 401,
                 message: "Invalid refresh token",
             });
         }
-        const foundUser = (await User.findById(user.userId).select("+refreshToken +accessToken")) as any;
+
+
+        const sessionIsValid = await sessionService.validateSession(decoded.userId, refreshToken);
+
+        if (!sessionIsValid) {
+            throw new ApiError({
+                statusCode: 401,
+                message: "Session expired or logged in on another device. Please login again.",
+            });
+        }
+
+        const foundUser = await User.findById(decoded.userId);
 
         if (!foundUser) {
             throw new ApiError({
@@ -343,9 +457,15 @@ const authService = {
         }
 
         CheckUserEmailAndBanned(foundUser);
+
         const newAccessToken = foundUser.generateAccessToken();
-        foundUser.accessToken = newAccessToken;
-        await foundUser.save();
+
+        try {
+            await cacheManager.del(cacheKeyFactory.user.byId(String(foundUser._id)));
+        } catch (err) {
+            logger.warn("cache.del failed during refreshTokenService:", err);
+        }
+
         return {
             message: "Token refreshed successfully",
             accessToken: newAccessToken,
@@ -357,14 +477,27 @@ const authService = {
                 statusCode: 401,
                 message: "Refresh token missing",
             });
-        } const user = jwt.verify(refreshToken, _config.JWT_REFRESH_TOKEN_SECRET!) as { userId: string };
-        if (!user) {
+        }
+
+        // Verify JWT signature
+        let decoded: { userId: string };
+        try {
+            decoded = jwt.verify(refreshToken, _config.JWT_REFRESH_TOKEN_SECRET!) as { userId: string };
+        } catch (err) {
             throw new ApiError({
                 statusCode: 401,
                 message: "Invalid refresh token",
             });
         }
-        const foundUser = (await User.findById(user.userId).select("+refreshToken +accessToken")) as any;
+
+        if (!decoded || !decoded.userId) {
+            throw new ApiError({
+                statusCode: 401,
+                message: "Invalid refresh token",
+            });
+        }
+
+        const foundUser = (await User.findById(decoded.userId).select("+refreshToken +accessToken")) as any;
 
         if (!foundUser) {
             throw new ApiError({
@@ -372,14 +505,43 @@ const authService = {
                 message: "User not found",
             });
         }
+
         CheckUserEmailAndBanned(foundUser);
 
-        foundUser.refreshToken = undefined;
-        foundUser.accessToken = undefined;
-        await foundUser.save();
+        // Delete session from Redis - enforce single device logout
+        try {
+            await sessionService.deleteSession(decoded.userId);
+        } catch (err) {
+            logger.error("Failed to delete session from Redis:", err);
+            // Continue logout even if Redis fails
+        }
+
+        // Invalidate user cache after logout
+        try {
+            await cacheManager.del(cacheKeyFactory.user.byId(String(foundUser._id)));
+        } catch (err) {
+            logger.warn("cache.del failed during logoutUserService:", err);
+        }
     },
     getCurrentUserService: async (req: any) => {
-        const user = await User.findById(req.user.id)
+        const userId = req.user.id;
+        const cacheKey = cacheKeyFactory.user.byId(String(userId));
+
+        // Try cache-aside: return cached value when present
+        try {
+            const cached = await cacheManager.get(cacheKey);
+            if (cached) {
+                return {
+                    message: "Current user fetched successfully (cache)",
+                    user: cached,
+                };
+            }
+        } catch (err) {
+            // non-fatal: if cache fails, continue to DB
+            logger.warn("cache.get failed in getCurrentUserService:", err);
+        }
+
+        const user = await User.findById(userId)
             .select("-password -verifyOtp -verifyOtpExpiry -refreshToken -accessToken")
             .populate("roleId")
             .lean();
@@ -387,25 +549,34 @@ const authService = {
         if (!user) {
             throw new ApiError({
                 statusCode: 404,
-                message: "User not found"
+                message: "User not found",
             });
+        }
+
+        const responseUser = {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            roleId: user.roleId?._id,
+            roleName: (user.roleId as any)?.name,
+            isEmailVerified: user.isEmailVerified,
+            approvalStatus: user.approvalStatus,
+            isBanned: user.isBanned,
+            permissions: req.user.permissions,
+            phone: user.phone,
+            address: user.address,
+        };
+
+        // Populate cache for future requests (best-effort)
+        try {
+            await cacheManager.set(cacheKey, responseUser, USER_CACHE_TTL);
+        } catch (err) {
+            logger.warn("cache.set failed in getCurrentUserService:", err);
         }
 
         return {
             message: "Current user fetched successfully",
-            user: {
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                roleId: user.roleId?._id,
-                roleName: (user.roleId as any)?.name,
-                isEmailVerified: user.isEmailVerified,
-                approvalStatus: user.approvalStatus,
-                isBanned: user.isBanned,
-                permissions: req.user.permissions,
-                phone: user.phone,
-                address: user.address,
-            }
+            user: responseUser,
         };
     }
 };

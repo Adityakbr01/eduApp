@@ -14,11 +14,11 @@ redisClient.on("error", (err) => logger.error("❌ Redis error:", err));
 // ✅ Graceful shutdown
 export async function closeRedis() {
     try {
-        console.log("⏳ Closing Redis connection...");
+        logger.info("⏳ Closing Redis connection...");
         await redisClient.quit();
-        console.log("✅ Redis connection closed");
+        logger.info("✅ Redis connection closed");
     } catch (err) {
-        console.error("❌ Error closing Redis:", err);
+        logger.error("❌ Error closing Redis:", err);
     }
 }
 

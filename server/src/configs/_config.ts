@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import logger from 'src/helpers/logger.js';
 dotenv.config();
 import zod from "zod";
 
@@ -58,7 +59,7 @@ const parsedConfig = configSchema.safeParse({
 
 //
 if (!parsedConfig.success) {
-    console.error("Invalid configuration:", parsedConfig.error);
+    logger.error("Invalid configuration:", parsedConfig.error);
     process.exit(1);
 }
 

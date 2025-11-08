@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 import { ApiError } from "src/utils/apiError.js";
-// import { getUserPermissions } from "./getUserPermissions.js";
 import type { JwtPayload } from "jsonwebtoken";
 import type { NextFunction } from "express";
 import _config from "src/configs/_config.js";

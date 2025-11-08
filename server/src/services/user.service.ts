@@ -6,9 +6,29 @@ import { RoleModel } from "src/models/RoleAndPermissions/role.model.js";
 import User from "src/models/user.model.js";
 import { approvalStatusEnum } from "src/types/user.model.Type.js";
 import { ApiError } from "src/utils/apiError.js";
+import cacheManager from "src/cache/cacheManager.js";
+import { cacheKeyFactory } from "src/cache/cacheKeyFactory.js";
+import { TTL } from "src/cache/cacheTTL.js";
+import cacheInvalidation from "src/cache/cacheInvalidation.js";
+import logger from "src/helpers/logger.js";
 
 const userService = {
     getAllUsers: async () => {
+        const cacheKey = cacheKeyFactory.user.all();
+
+        // Try cache first
+        try {
+            const cached = await cacheManager.get(cacheKey);
+            if (cached) {
+                return {
+                    message: "Users fetched successfully (cached)",
+                    data: cached,
+                };
+            }
+        } catch (err) {
+            logger.warn("cache.get failed in getAllUsers:", err);
+        }
+
         const users = await User.find().exec();
         if (!users) {
             throw new ApiError({
@@ -17,12 +37,35 @@ const userService = {
                 ]
             });
         }
+
+        // Cache the result
+        try {
+            await cacheManager.set(cacheKey, users, TTL.USER_LIST);
+        } catch (err) {
+            logger.warn("cache.set failed in getAllUsers:", err);
+        }
+
         return {
             message: "Users fetched successfully",
             data: users,
         };
     },
     getUserById: async (userId: string) => {
+        const cacheKey = cacheKeyFactory.user.byId(userId);
+
+        // Try cache first
+        try {
+            const cached = await cacheManager.get(cacheKey);
+            if (cached) {
+                return {
+                    message: "User fetched successfully (cached)",
+                    data: cached,
+                };
+            }
+        } catch (err) {
+            logger.warn("cache.get failed in getUserById:", err);
+        }
+
         const user = await User.findById(userId).exec();
         if (!user) {
             throw new ApiError({
@@ -31,6 +74,14 @@ const userService = {
                 ]
             })
         }
+
+        // Cache the result
+        try {
+            await cacheManager.set(cacheKey, user, TTL.USER_PROFILE);
+        } catch (err) {
+            logger.warn("cache.set failed in getUserById:", err);
+        }
+
         return {
             message: "User fetched successfully",
             data: user,
@@ -45,6 +96,10 @@ const userService = {
                 ]
             });
         }
+
+        // Invalidate all user-related caches
+        await cacheInvalidation.invalidateUser(userId);
+
         return {
             message: "User updated successfully",
             data: user,
@@ -59,12 +114,31 @@ const userService = {
                 ]
             });
         }
+
+        // Invalidate all user-related caches
+        await cacheInvalidation.invalidateUser(userId);
+
         return {
             message: "User deleted successfully",
             data: user,
         };
     },
     getRolesAndPermissions: async () => {
+        const cacheKey = cacheKeyFactory.role.all();
+
+        // Try cache first
+        try {
+            const cached = await cacheManager.get(cacheKey);
+            if (cached) {
+                return {
+                    message: "Roles and permissions fetched successfully (cached)",
+                    data: cached,
+                };
+            }
+        } catch (err) {
+            logger.warn("cache.get failed in getRolesAndPermissions:", err);
+        }
+
         const rolesWithPermissions = await RoleModel.aggregate([
             // 1️⃣ Join RolePermission to get permissions for each role
             {
@@ -103,6 +177,13 @@ const userService = {
                     { path: "roles", message: "No roles found in the database" }
                 ]
             });
+        }
+
+        // Cache the result
+        try {
+            await cacheManager.set(cacheKey, rolesWithPermissions, TTL.ROLE_PERMISSIONS);
+        } catch (err) {
+            logger.warn("cache.set failed in getRolesAndPermissions:", err);
         }
 
         return {
@@ -156,6 +237,9 @@ const userService = {
         user.permissions = [...user.permissions, ...newPermissions];
         await user.save();
 
+        // Invalidate user caches when permissions change
+        await cacheInvalidation.invalidateUser(userId);
+
         return {
             message: "Permissions assigned successfully",
             data: user,
@@ -189,6 +273,9 @@ const userService = {
 
         user.permissions = updatedPermissions;
         await user.save();
+
+        // Invalidate user caches when permissions change
+        await cacheInvalidation.invalidateUser(userId);
 
         return {
             message: "Permissions deleted successfully",
@@ -228,6 +315,9 @@ const userService = {
         user.approvalStatus = approvalStatusEnum.APPROVED;
         user.approvedBy = new Types.ObjectId(approvedBy);
         await user.save();
+
+        // Invalidate user caches when user is approved
+        await cacheInvalidation.invalidateUser(userId);
 
         return {
             message: "User approved successfully",
