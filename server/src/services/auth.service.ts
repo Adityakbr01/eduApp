@@ -38,13 +38,12 @@ const authService = {
                     isBanned: 1,
                     verifyOtp: 1,
                     verifyOtpExpiry: 1,
+                    approvalStatus: 1,
                 }
             }
         ]);
 
         const existingUser = userAgg[0];
-
-        console.log("Existing user:", existingUser);
 
         // ✅ Step 2: If user is banned
         if (existingUser && existingUser.isBanned) {
@@ -85,7 +84,7 @@ const authService = {
         // ✅ Step 4: If user exists AND verified → block
         if (existingUser && existingUser.isEmailVerified) {
             throw new ApiError({
-                statusCode: 400,
+                statusCode: 409,
                 message: "Account already exists. Please login.",
             });
         }
@@ -144,7 +143,7 @@ const authService = {
         };
     },
     sendRegisterOtpService: async (email: string) => {
-        const user = (await User.findOne({ email }).select("+verifyOtp +verifyOtpExpiry")) as any;
+        const user = (await User.findOne({ email }).select("+verifyOtp +verifyOtpExpiry +approvalStatus")) as any;
 
 
         if (!user) {
@@ -183,10 +182,15 @@ const authService = {
         } catch (err) {
             logger.warn("cache.del failed during sendRegisterOtpService:", err);
         }
+        return {
+            message: "OTP sent successfully",
+            userId: user._id,
+            email: user.email,
+        };
     },
     verifyRegisterOtpService: async (email: string, otp: string) => {
         const user = await User.findOne({ email }).select(
-            "+verifyOtp +verifyOtpExpiry"
+            "+verifyOtp +verifyOtpExpiry +approvalStatus"
         ) as any;
 
         CheckUserEmailAndBanned(user);
@@ -240,7 +244,7 @@ const authService = {
         };
     },
     loginUserService: async (email: string, password: string) => {
-        const user = await User.findOne({ email }).select("+password");
+        const user = await User.findOne({ email }).select("+password +isEmailVerified +isBanned +approvalStatus") as any;
 
         if (!user) {
             throw new ApiError({
@@ -301,7 +305,7 @@ const authService = {
         };
     },
     sendResetPassOtpService: async (email: string) => {
-        const user = (await User.findOne({ email })) as any;
+        const user = (await User.findOne({ email }).select("+verifyOtp +verifyOtpExpiry +approvalStatus")) as any;
         CheckUserEmailAndBanned(user)
 
         const { otp, hashedOtp, expiry } = await generateOtp();
@@ -331,7 +335,7 @@ const authService = {
     },
     verifyResetPassOtpService: async (email: string, otp: string, newPassword: string) => {
         const user = await User.findOne({ email }).select(
-            "+verifyOtp +verifyOtpExpiry +password"
+            "+verifyOtp +verifyOtpExpiry +password +approvalStatus"
         ) as any;
 
         CheckUserEmailAndBanned(user);
@@ -384,7 +388,7 @@ const authService = {
         };
     },
     changePasswordService: async (userId: string, currentPassword: string, newPassword: string) => {
-        const user = (await User.findById(userId).select("+password")) as any;
+        const user = (await User.findById(userId).select("+password +isEmailVerified +isBanned +approvalStatus")) as any;
         CheckUserEmailAndBanned(user)
 
         const isPasswordValid = await user.comparePassword(currentPassword);
@@ -459,7 +463,7 @@ const authService = {
             });
         }
 
-        const foundUser = await User.findById(decoded.userId);
+        const foundUser = await User.findById(decoded.userId).select("+accessToken +isBanned +approvalStatus") as any;
 
         if (!foundUser) {
             throw new ApiError({
@@ -534,6 +538,9 @@ const authService = {
         } catch (err) {
             logger.warn("cache.del failed during logoutUserService:", err);
         }
+        return {
+            message: "Logout successful",
+        };
     },
     getCurrentUserService: async (req: any) => {
         const userId = req.user.id;

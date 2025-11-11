@@ -92,7 +92,6 @@ api.interceptors.response.use(
 
         // === Global error toast handler ===
         if (error.response) {
-            console.log("API Error Response:", error.response); // Debug log
             const status = error.response.status;
             const msg = error?.response?.data?.message || "Something went wrong";
 

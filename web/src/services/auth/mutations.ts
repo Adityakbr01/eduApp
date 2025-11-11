@@ -22,7 +22,6 @@ const authApi = {
      */
     register: async (data: RegisterRequest): Promise<OtpResponse> => {
         const response = await api.post<ApiResponse<OtpResponse>>("/auth/register", data);
-        console.log("Register response:", response.data);
         return response.data.data!;
     },
 
@@ -31,7 +30,6 @@ const authApi = {
      */
     sendRegisterOtp: async (data: SendOtpRequest): Promise<OtpResponse> => {
         const response = await api.post<ApiResponse<OtpResponse>>("/auth/register/send-otp", data);
-        console.log("Send OTP response:", response.data);
         return response.data.data!;
     },
 

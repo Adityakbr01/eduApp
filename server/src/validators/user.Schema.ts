@@ -64,11 +64,6 @@ const registerSchema = z.discriminatedUnion("role", [
         role: z.literal(ROLES.SUPPORT),
         supportTeamProfile: supportTeamProfileSchema,
     }),
-
-    z.object({
-        ...baseSchema,
-        role: z.literal(ROLES.ADMIN),
-    }),
 ]);
 
 //Register and Verify OTP
