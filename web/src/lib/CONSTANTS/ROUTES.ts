@@ -11,6 +11,20 @@ const ROUTES = {
         RESET_PASSWORD: "/reset-password",
         RESET_PASSWORD_VERIFY: "/reset-password/verify",
     },
+    USERS: {
+        Admin: {
+            DASHBOARD: "/admin/dashboard",
+        },
+        MANAGER: {
+            DASHBOARD: "/manager/dashboard",
+        },
+        SUPPORT_TEAM: {
+            DASHBOARD: "SUPPORT_TEAM/dashboard",
+        },
+        INSTRUCTOR: {
+            DASHBOARD: "/instructor/dashboard",
+        }
+    },
 };
 
 export default ROUTES;

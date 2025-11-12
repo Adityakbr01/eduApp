@@ -128,7 +128,7 @@ const useVerifyRegisterOtp = (
 const useLogin = (
     options?: UseMutationOptions<AuthResponse, Error, LoginRequest>
 ) => {
-    const { setAccessToken, setUser } = useAuthStore();
+    const { setAccessToken } = useAuthStore();
     const queryClient = useQueryClient();
 
     return useMutation<AuthResponse, Error, LoginRequest>({
@@ -139,16 +139,7 @@ const useLogin = (
                 setAccessToken(data.accessToken);
             }
 
-            // Store user data
-            if (data.userId && data.email) {
-                setUser({
-                    id: data.userId,
-                    email: data.email,
-                    name: "", // Will be updated when fetching profile
-                    role: "",
-                    phone: "",
-                });
-            }
+            // User data will be fetched by useInitUser hook
             queryClient.invalidateQueries({ queryKey: QUERY_KEYS.AUTH.ME });
 
             toast.success("Login successful!");

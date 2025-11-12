@@ -6,7 +6,7 @@ import { gsap } from "gsap";
 
 import ResetPasswordVerifyForm from "@/components/Form/auth/reset-Password-form/ResetPasswordVerifyForm";
 
-function ResetPasswordVerifyPage() {
+function ResetPasswordVerifyPage({ initialEmail }: { initialEmail: string }) {
     //Animation
     const formWrapperRef = useRef<HTMLDivElement>(null);
     const smoke1Ref = useRef(null);
@@ -49,7 +49,7 @@ function ResetPasswordVerifyPage() {
                             Enter the OTP code we sent to your email and set your new password.
                         </p>
                     </div>
-                    <ResetPasswordVerifyForm />
+                    <ResetPasswordVerifyForm initialEmail={initialEmail} />
                 </div>
             </div>
             <div ref={smoke1Ref} className="fluid-container absolute z-10 bg-[#1b80ed6c] h-[90vh] w-[90vh] rounded-full -top-[50vh] -right-[90vh] blur-[40vh]">

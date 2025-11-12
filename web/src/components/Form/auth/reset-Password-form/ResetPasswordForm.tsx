@@ -40,11 +40,8 @@ export default function ResetPasswordForm() {
     });
 
     const onSubmit = async (data: ResetPasswordForm) => {
-        console.log("🚀 Reset password OTP request:", data);
-
         try {
-            const result = await sendOtpMutation.mutateAsync(data);
-            console.log("✅ OTP sent successfully:", result);
+            await sendOtpMutation.mutateAsync(data);
 
             // Navigate to verify OTP page with email in state
             router.push(`${ROUTES.AUTH.RESET_PASSWORD_VERIFY}?email=${encodeURIComponent(data.email)}`);
@@ -62,13 +59,9 @@ export default function ResetPasswordForm() {
         }
     };
 
-    const onError = (errors: unknown) => {
-        console.log("❌ Form validation errors:", errors);
-    };
-
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <FormField
                     control={form.control}
                     name="email"

@@ -5,8 +5,8 @@ import {
     type ResetPasswordVerifyInput,
 } from "@/validators/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import {
@@ -20,7 +20,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Loader2, Mail, Lock, KeyRound } from "lucide-react";
+import { Eye, EyeOff, KeyRound, Loader2, Lock, Mail } from "lucide-react";
 
 import ROUTES from "@/lib/CONSTANTS/ROUTES";
 import authMutations from "@/services/auth/mutations";
@@ -28,36 +28,39 @@ import { AxiosError } from "axios";
 
 type ResetPasswordVerifyForm = ResetPasswordVerifyInput;
 
-export default function ResetPasswordVerifyForm() {
+export default function ResetPasswordVerifyForm({
+    initialEmail = "",
+}: {
+    initialEmail?: string;
+}) {
     const [showPassword, setShowPassword] = useState(false);
+    const [cooldown, setCooldown] = useState(0);
     const router = useRouter();
-    const searchParams = useSearchParams();
     const verifyOtpMutation = authMutations.useVerifyResetPasswordOtp();
+    const sendOtpMutation = authMutations.useSendResetPasswordOtp();
+
+    // Cooldown timer effect
+    useEffect(() => {
+        if (cooldown > 0) {
+            const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [cooldown]);
+
 
     const form = useForm<ResetPasswordVerifyForm>({
         resolver: zodResolver(resetPasswordVerifySchema),
         defaultValues: {
-            email: "",
+            email: initialEmail,
             otp: "",
             newPassword: "",
         },
         mode: "onBlur",
     });
 
-    // Pre-fill email from query params
-    useEffect(() => {
-        const email = searchParams.get("email");
-        if (email) {
-            form.setValue("email", email);
-        }
-    }, [searchParams, form]);
-
     const onSubmit = async (data: ResetPasswordVerifyForm) => {
-        console.log("🚀 Reset password verify submitted:", { ...data, newPassword: "***" });
-
         try {
-            const result = await verifyOtpMutation.mutateAsync(data);
-            console.log("✅ Password reset successful:", result);
+            await verifyOtpMutation.mutateAsync(data);
 
             // Navigate to login page
             router.push(ROUTES.AUTH.LOGIN);
@@ -80,13 +83,33 @@ export default function ResetPasswordVerifyForm() {
         }
     };
 
-    const onError = (errors: unknown) => {
-        console.log("❌ Form validation errors:", errors);
+
+    const handleResendOtp = async () => {
+        if (!initialEmail) {
+            console.error("❌ No email provided");
+            return;
+        }
+
+        try {
+            await sendOtpMutation.mutateAsync({ email: initialEmail });
+            setCooldown(60); // Set 60 second cooldown
+        } catch (error) {
+            console.error("❌ Failed to resend OTP:", error);
+            if (error instanceof AxiosError && error.response) {
+                const { status } = error.response;
+                if (status === 404) {
+                    form.setError("email", {
+                        type: "manual",
+                        message: "User not found",
+                    });
+                }
+            }
+        }
     };
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                     control={form.control}
                     name="email"
@@ -115,7 +138,21 @@ export default function ResetPasswordVerifyForm() {
                     name="otp"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-sm font-medium">OTP Code *</FormLabel>
+                            <div className="flex justify-between items-center mb-2">
+                                <FormLabel className="text-sm font-medium">OTP Code *</FormLabel>
+                                <button
+                                    type="button"
+                                    onClick={handleResendOtp}
+                                    disabled={cooldown > 0 || sendOtpMutation.isPending}
+                                    className="text-xs text-primary hover:underline disabled:text-muted-foreground disabled:no-underline disabled:cursor-not-allowed"
+                                >
+                                    {sendOtpMutation.isPending
+                                        ? "Sending..."
+                                        : cooldown > 0
+                                            ? `Resend in ${cooldown}s`
+                                            : "Resend OTP"}
+                                </button>
+                            </div>
                             <FormControl>
                                 <div className="relative">
                                     <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

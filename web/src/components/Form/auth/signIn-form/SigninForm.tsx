@@ -62,12 +62,9 @@ export default function SigninForm() {
 
 
     const onSubmit = async (data: SigninForm) => {
-        console.log("🚀 Login form submitted:", data);
-        console.log("📌 Remember Me:", rememberMe);
 
         try {
-            const result = await loginMutation.mutateAsync(data);
-            console.log("✅ Login successful:", result);
+            await loginMutation.mutateAsync(data);
 
             if (rememberMe) {
                 secureLocalStorage.setItem("userCredentials", data);
@@ -97,13 +94,10 @@ export default function SigninForm() {
         }
     };
 
-    const onError = (errors: unknown) => {
-        console.log("❌ Form validation errors:", errors);
-    };
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                     control={form.control}
                     name="email"

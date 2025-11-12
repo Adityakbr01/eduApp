@@ -1,3 +1,5 @@
+import { approvalStatusEnum } from "@/store/auth";
+
 // Auth Types
 export interface User {
     _id: string;
@@ -7,7 +9,7 @@ export interface User {
     roleId: string;
     roleName: string;
     isEmailVerified: boolean;
-    approvalStatus: "PENDING" | "APPROVED" | "REJECTED";
+    approvalStatus: approvalStatusEnum;
     isBanned: boolean;
     permissions: string[];
     address?: string;
@@ -65,10 +67,11 @@ export interface ChangePasswordRequest {
 export interface AuthResponse {
     message: string;
     userId?: string;
+    phone?: string,
     email?: string;
     isEmailVerified?: boolean;
     permissions?: string[];
-    approvalStatus?: string;
+    approvalStatus?: approvalStatusEnum;
     accessToken?: string;
     refreshToken?: string;
 }

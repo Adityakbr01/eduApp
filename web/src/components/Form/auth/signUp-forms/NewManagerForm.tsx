@@ -84,12 +84,9 @@ export default function NewManagerForm() {
 
     // restore step & sync saved values
     useEffect(() => {
-        console.log("🎯 Initializing Manager form with role:", initialValues.role);
-        console.log("📋 Initial values:", initialValues);
 
         // If we had wrong role data, clear it
         if (!isManagerData && restored) {
-            console.log("🗑️ Clearing old localStorage data (wrong role)");
             secureLocalStorage.removeItem("registerData");
             secureLocalStorage.removeItem("registerFormData");
         }
@@ -111,7 +108,6 @@ export default function NewManagerForm() {
     const goToStep2 = async () => {
         const ok = await form.trigger(["name", "email", "password", "phone", "address"]);
         if (ok) {
-            console.log("✅ Step 1 validation passed, moving to step 2");
             // Save only step1 data (no managerProfile yet)
             const formData = form.getValues();
             secureLocalStorage.setItem("registerFormData", {
@@ -142,12 +138,10 @@ export default function NewManagerForm() {
             setStep(2);
         } else {
             console.log("❌ Step 1 validation failed");
-            console.log("❌ Errors:", form.formState.errors);
         }
     };
 
     const goToStep1 = () => {
-        console.log("⬅️ Going back to step 1");
         secureLocalStorage.setItem("authStep", "1");
         setStep(1);
     };
@@ -161,9 +155,6 @@ export default function NewManagerForm() {
         if (!isValid) {
             return;
         }
-
-        console.log("✅ Validation passed, calling API...");
-
         try {
             // Get all form values to ensure nothing is undefined
             const formValues = form.getValues();
@@ -179,8 +170,6 @@ export default function NewManagerForm() {
         } catch (error) {
             console.error("❌ API call failed:", error);
             if (error instanceof AxiosError && error.response) {
-                console.log("Error status:", error.response.status);
-                console.log("Error data:", error.response.data);
                 if (error.response.status === 409) {
                     router.push(ROUTES.AUTH.LOGIN);
                 }
@@ -369,7 +358,7 @@ export default function NewManagerForm() {
                                 type="button"
                                 variant="outline"
                                 onClick={() => {
-                                    console.log("⬅️ Back button clicked");
+
                                     goToStep1();
                                 }}
                                 className="h-11 flex-1"

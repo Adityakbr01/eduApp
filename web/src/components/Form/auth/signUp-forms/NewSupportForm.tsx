@@ -138,7 +138,6 @@ export default function NewSupportForm() {
             setStep(2);
         } else {
             console.log("❌ Step 1 validation failed");
-            console.log("❌ Errors:", form.formState.errors);
         }
     };
 
@@ -371,7 +370,6 @@ export default function NewSupportForm() {
                                 type="button"
                                 variant="outline"
                                 onClick={() => {
-                                    console.log("⬅️ Back button clicked");
                                     goToStep1();
                                 }}
                                 className="h-11 flex-1"
@@ -382,7 +380,6 @@ export default function NewSupportForm() {
                                 type="submit"
                                 disabled={registerMutation.isPending}
                                 className="h-11 flex-1 font-semibold"
-                                onClick={() => console.log("🔘 Submit button clicked")}
                             >
                                 {registerMutation.isPending ? (
                                     <>

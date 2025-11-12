@@ -2,21 +2,27 @@
 import { create } from "zustand";
 import { secureLocalStorage } from "@/lib/utils/encryption";
 
-export type Occupation =
-    | "student"
-    | "workingProfessional"
-    | "intern"
-    | "freelancer";
-
+export enum approvalStatusEnum {
+    PENDING = "PENDING",
+    APPROVED = "APPROVED",
+    REJECTED = "REJECTED",
+}
 
 export interface User {
-    id: string;
-    _id?: string;
-    email: string;
-    phone: string;
+    _id: string;
     name: string;
-    role: string;
+    email: string;
+    roleId: string;
+    roleName: string;
+    isEmailVerified: boolean;
+    approvalStatus: approvalStatusEnum;
+    isBanned: boolean;
+    permissions: string[];
+    phone?: string;
+    address?: string;
 }
+
+
 
 
 export interface AuthState {
