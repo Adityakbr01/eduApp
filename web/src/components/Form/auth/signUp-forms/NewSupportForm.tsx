@@ -22,7 +22,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, User, Mail, Lock, Phone, MapPin, Clock, Award } from "lucide-react";
 
 import ROUTES from "@/lib/CONSTANTS/ROUTES";
 import { secureLocalStorage } from "@/lib/utils/encryption";
@@ -88,8 +88,6 @@ export default function NewSupportForm() {
 
         // If we had wrong role data, clear it
         if (!isSupportData && restored) {
-            console.log("🗑️ Clearing old localStorage data (wrong role)");
-            secureLocalStorage.removeItem("registerData");
             secureLocalStorage.removeItem("registerFormData");
         }
 
@@ -108,12 +106,8 @@ export default function NewSupportForm() {
 
     // ---- step handlers ----
     const goToStep2 = async () => {
-        console.log("➡️ Attempting to go to step 2");
-        console.log("📋 Current form values before step 2:", form.getValues());
-
         const ok = await form.trigger(["name", "email", "password", "phone", "address"]);
         if (ok) {
-            console.log("✅ Step 1 validation passed, moving to step 2");
             // Save only step1 data (no supportTeamProfile yet)
             const formData = form.getValues();
             secureLocalStorage.setItem("registerFormData", {
@@ -164,7 +158,6 @@ export default function NewSupportForm() {
             return;
         }
 
-        console.log("✅ Validation passed, calling API...");
 
         try {
             // Get all form values to ensure nothing is undefined
@@ -181,8 +174,6 @@ export default function NewSupportForm() {
         } catch (error) {
             console.error("❌ API call failed:", error);
             if (error instanceof AxiosError && error.response) {
-                console.log("Error status:", error.response.status);
-                console.log("Error data:", error.response.data);
                 if (error.response.status === 409) {
                     router.push(ROUTES.AUTH.LOGIN);
                 }
@@ -206,7 +197,10 @@ export default function NewSupportForm() {
                                 <FormItem>
                                     <FormLabel>Full Name *</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="John Doe" {...field} />
+                                        <div className="relative">
+                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input placeholder="John Doe" {...field} className="pl-10" />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -220,7 +214,10 @@ export default function NewSupportForm() {
                                 <FormItem>
                                     <FormLabel>Email Address *</FormLabel>
                                     <FormControl>
-                                        <Input type="email" placeholder="john@example.com" {...field} />
+                                        <div className="relative">
+                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input type="email" placeholder="john@example.com" {...field} className="pl-10" />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -235,11 +232,12 @@ export default function NewSupportForm() {
                                     <FormLabel>Password *</FormLabel>
                                     <FormControl>
                                         <div className="relative">
+                                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                             <Input
                                                 type={showPassword ? "text" : "password"}
                                                 placeholder="••••••••"
                                                 {...field}
-                                                className="pr-10"
+                                                className="pl-10 pr-10"
                                             />
                                             <button
                                                 type="button"
@@ -269,7 +267,10 @@ export default function NewSupportForm() {
                                 <FormItem>
                                     <FormLabel>Phone Number</FormLabel>
                                     <FormControl>
-                                        <Input type="tel" placeholder="9876543210" {...field} />
+                                        <div className="relative">
+                                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input type="tel" placeholder="9876543210" {...field} className="pl-10" />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -283,7 +284,10 @@ export default function NewSupportForm() {
                                 <FormItem>
                                     <FormLabel>Address</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="123 Main Street, City" {...field} />
+                                        <div className="relative">
+                                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input placeholder="123 Main Street, City" {...field} className="pl-10" />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -320,7 +324,10 @@ export default function NewSupportForm() {
                                 <FormItem>
                                     <FormLabel>Shift Timings *</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="9 AM - 5 PM" {...field} />
+                                        <div className="relative">
+                                            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input placeholder="9 AM - 5 PM" {...field} className="pl-10" />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -334,21 +341,25 @@ export default function NewSupportForm() {
                                 <FormItem>
                                     <FormLabel>Expertise Areas (comma separated) *</FormLabel>
                                     <FormControl>
-                                        <Input
-                                            placeholder="Technical Support, Billing, Account Management"
-                                            value={expertiseInput}
-                                            onChange={(e) => {
-                                                const v = e.target.value;
-                                                setExpertiseInput(v);
-                                                const arr = v
-                                                    .split(",")
-                                                    .map((s) => s.trim())
-                                                    .filter(Boolean);
-                                                form.setValue("supportTeamProfile.expertiseAreas", arr, {
-                                                    shouldValidate: true,
-                                                });
-                                            }}
-                                        />
+                                        <div className="relative">
+                                            <Award className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                placeholder="Technical Support, Billing, Account Management"
+                                                value={expertiseInput}
+                                                onChange={(e) => {
+                                                    const v = e.target.value;
+                                                    setExpertiseInput(v);
+                                                    const arr = v
+                                                        .split(",")
+                                                        .map((s) => s.trim())
+                                                        .filter(Boolean);
+                                                    form.setValue("supportTeamProfile.expertiseAreas", arr, {
+                                                        shouldValidate: true,
+                                                    });
+                                                }}
+                                                className="pl-10"
+                                            />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

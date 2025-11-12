@@ -110,6 +110,23 @@ export const changePasswordSchema = z.object({
     newPassword: z.string().min(6, "New password must be at least 6 characters"),
 });
 
+// Reset password schemas
+export const resetPasswordEmailSchema = z.object({
+    email: z.string().email("Invalid email"),
+});
+
+export const resetPasswordVerifySchema = z.object({
+    email: z.string().email("Invalid email"),
+    otp: z.string().length(6, "OTP must be 6 characters"),
+    newPassword: z
+        .string()
+        .min(6, "Password must be at least 6 characters")
+        .regex(/[A-Z]/, "Must include at least one uppercase letter")
+        .regex(/[a-z]/, "Must include at least one lowercase letter")
+        .regex(/[0-9]/, "Must include at least one number"),
+});
+
+
 // Export types
 export type RegisterSchemaInput = z.infer<typeof registerSchema>;
 export type SigninFormInput = z.infer<typeof loginSchema>;
@@ -117,6 +134,8 @@ export type StudentRegisterInput = z.infer<typeof registerSchema> & { role: type
 export type InstructorRegisterInput = z.infer<typeof registerSchema> & { role: typeof ROLES.INSTRUCTOR };
 export type ManagerRegisterInput = z.infer<typeof registerSchema> & { role: typeof ROLES.MANAGER };
 export type SupportRegisterInput = z.infer<typeof registerSchema> & { role: typeof ROLES.SUPPORT };
+export type ResetPasswordEmailInput = z.infer<typeof resetPasswordEmailSchema>;
+export type ResetPasswordVerifyInput = z.infer<typeof resetPasswordVerifySchema>;
 
 
 

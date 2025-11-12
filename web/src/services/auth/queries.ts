@@ -6,10 +6,8 @@ import type { UserProfileResponse, ApiResponse } from "./types";
 
 const authApi = {
     getCurrentUser: async (): Promise<UserProfileResponse> => {
-        console.log("🌐 Making API call to /auth/me...");
         try {
             const { data } = await api.get<ApiResponse<UserProfileResponse>>("/auth/me");
-            console.log("✅ /auth/me response:", data);
             return data.data!;
         } catch (error) {
             console.error("❌ /auth/me failed:", error);

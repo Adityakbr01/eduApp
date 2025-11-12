@@ -134,17 +134,13 @@ const useLogin = (
     return useMutation<AuthResponse, Error, LoginRequest>({
         mutationFn: authApi.login,
         onSuccess: (data) => {
-            console.log("🎉 Login mutation success:", data);
-
             // Store access token
             if (data.accessToken) {
-                console.log("💾 Storing access token in Zustand + localStorage");
                 setAccessToken(data.accessToken);
             }
 
             // Store user data
             if (data.userId && data.email) {
-                console.log("👤 Storing user data:", { userId: data.userId, email: data.email });
                 setUser({
                     id: data.userId,
                     email: data.email,
@@ -153,8 +149,6 @@ const useLogin = (
                     phone: "",
                 });
             }
-
-            console.log("🔄 Invalidating AUTH.ME query to refetch user data");
             queryClient.invalidateQueries({ queryKey: QUERY_KEYS.AUTH.ME });
 
             toast.success("Login successful!");

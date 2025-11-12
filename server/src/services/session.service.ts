@@ -1,5 +1,6 @@
 import _config from "src/configs/_config.js";
 import cacheManager from "src/cache/cacheManager.js";
+import logger from "src/helpers/logger.js";
 
 /**
  * Session Service - Manages user sessions in Redis
@@ -26,7 +27,7 @@ class SessionService {
      * Overwrites any existing session (enforces single device login)
      */
     async createSession(userId: string, refreshToken: string): Promise<void> {
-        console.log(`🔐 Creating session for user: ${userId}`);
+        logger.info(`🔐 Creating session for user: ${userId}`);
 
         const sessionKey = this.getSessionKey(userId);
         const ttl = _config.JWT_REFRESH_TOKEN_EXPIRES_IN_SECONDS;
@@ -40,7 +41,7 @@ class SessionService {
         };
 
         await cacheManager.set(sessionKey, sessionData, ttl);
-        console.log(`✅ Session created successfully for user: ${userId}, expires in ${ttl}s`);
+        logger.info(`✅ Session created successfully for user: ${userId}, expires in ${ttl}s`);
     }
 
     /**
@@ -48,19 +49,19 @@ class SessionService {
      * Returns true if valid, false otherwise
      */
     async validateSession(userId: string, refreshToken: string): Promise<boolean> {
-        console.log(`🔍 Validating session for user: ${userId}`);
+        logger.info(`🔍 Validating session for user: ${userId}`);
 
         const sessionKey = this.getSessionKey(userId);
         const sessionData = await cacheManager.get(sessionKey) as SessionData | null;
 
         if (!sessionData) {
-            console.log(`❌ No session found for user: ${userId}`);
+            logger.info(`❌ No session found for user: ${userId}`);
             return false;
         }
 
         // Check if session has expired
         if (sessionData.expiresAt < Date.now()) {
-            console.log(`❌ Session expired for user: ${userId}`);
+            logger.info(`❌ Session expired for user: ${userId}`);
             await this.deleteSession(userId);
             return false;
         }
@@ -69,9 +70,9 @@ class SessionService {
         const isValid = sessionData.refreshToken === refreshToken;
 
         if (isValid) {
-            console.log(`✅ Session valid for user: ${userId}`);
+            logger.info(`✅ Session valid for user: ${userId}`);
         } else {
-            console.log(`❌ Refresh token mismatch for user: ${userId} - User logged in on another device`);
+            logger.info(`❌ Refresh token mismatch for user: ${userId} - User logged in on another device`);
         }
 
         return isValid;
@@ -89,10 +90,10 @@ class SessionService {
      * Delete user session from Redis
      */
     async deleteSession(userId: string): Promise<void> {
-        console.log(`🗑️ Deleting session for user: ${userId}`);
+        logger.info(`🗑️ Deleting session for user: ${userId}`);
         const sessionKey = this.getSessionKey(userId);
         await cacheManager.del(sessionKey);
-        console.log(`✅ Session deleted for user: ${userId}`);
+        logger.info(`✅ Session deleted for user: ${userId}`);
     }
 
     /**

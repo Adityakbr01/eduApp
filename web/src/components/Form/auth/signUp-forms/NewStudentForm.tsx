@@ -22,13 +22,12 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2, User, Mail, Lock, Phone, MapPin } from "lucide-react";
 
 import ROUTES from "@/lib/CONSTANTS/ROUTES";
 import { secureLocalStorage } from "@/lib/utils/encryption";
 import authMutations from "@/services/auth/mutations";
 import { AxiosError } from "axios";
-import { Loader2 } from "lucide-react";
 
 type RegisterFormData = RegisterSchemaInput;
 
@@ -110,11 +109,14 @@ function NewStudentForm() {
                             <FormItem>
                                 <FormLabel className="text-sm font-medium">Full Name *</FormLabel>
                                 <FormControl>
-                                    <Input
-                                        placeholder="John Doe"
-                                        {...field}
-                                        className="h-11 rounded-lg text-sm"
-                                    />
+                                    <div className="relative">
+                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            placeholder="John Doe"
+                                            {...field}
+                                            className="h-11 rounded-lg text-sm pl-10"
+                                        />
+                                    </div>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -130,12 +132,15 @@ function NewStudentForm() {
                                     Email Address *
                                 </FormLabel>
                                 <FormControl>
-                                    <Input
-                                        type="email"
-                                        placeholder="john@example.com"
-                                        {...field}
-                                        className="h-11 rounded-lg text-sm"
-                                    />
+                                    <div className="relative">
+                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            type="email"
+                                            placeholder="john@example.com"
+                                            {...field}
+                                            className="h-11 rounded-lg text-sm pl-10"
+                                        />
+                                    </div>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -150,11 +155,12 @@ function NewStudentForm() {
                                 <FormLabel className="text-sm font-medium">Password *</FormLabel>
                                 <FormControl>
                                     <div className="relative">
+                                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                         <Input
                                             type={showPassword ? "text" : "password"}
                                             placeholder="••••••••"
                                             {...field}
-                                            className="h-11 rounded-lg text-sm pr-10"
+                                            className="h-11 rounded-lg text-sm pl-10 pr-10"
                                         />
                                         <button
                                             type="button"
@@ -184,13 +190,16 @@ function NewStudentForm() {
                             <FormItem>
                                 <FormLabel className="text-sm font-medium">Phone Number</FormLabel>
                                 <FormControl>
-                                    <Input
-                                        type="tel"
-                                        placeholder="9876543210"
-                                        {...field}
-                                        value={field.value || ""}
-                                        className="h-11 rounded-lg text-sm"
-                                    />
+                                    <div className="relative">
+                                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            type="tel"
+                                            placeholder="9876543210"
+                                            {...field}
+                                            value={field.value || ""}
+                                            className="h-11 rounded-lg text-sm pl-10"
+                                        />
+                                    </div>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -204,12 +213,15 @@ function NewStudentForm() {
                             <FormItem>
                                 <FormLabel className="text-sm font-medium">Address</FormLabel>
                                 <FormControl>
-                                    <Input
-                                        placeholder="123 Main Street, City"
-                                        {...field}
-                                        value={field.value || ""}
-                                        className="h-11 rounded-lg text-sm"
-                                    />
+                                    <div className="relative">
+                                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            placeholder="123 Main Street, City"
+                                            {...field}
+                                            value={field.value || ""}
+                                            className="h-11 rounded-lg text-sm pl-10"
+                                        />
+                                    </div>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

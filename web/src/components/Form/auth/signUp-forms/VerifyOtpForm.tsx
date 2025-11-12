@@ -7,7 +7,7 @@ import ROUTES from "@/lib/CONSTANTS/ROUTES";
 import { secureLocalStorage } from "@/lib/utils/encryption";
 import authMutations from "@/services/auth/mutations";
 import { registerVerifyOtpSchema } from "@/validators/auth.schema";
-import { Loader2 } from "lucide-react";
+import { Loader2, KeyRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -124,17 +124,20 @@ export default function VerifyOtpForm() {
                 OTP sent to <span className="font-semibold">{maskEmail(email)}</span>
             </p>
 
-            <Input
-                type="text"
-                inputMode="numeric"
-                placeholder="Enter 6-digit OTP"
-                value={otp}
-                onChange={(e) =>
-                    setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
-                }
-                maxLength={6}
-                className="h-11 text-center tracking-widest text-lg"
-            />
+            <div className="relative">
+                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="Enter 6-digit OTP"
+                    value={otp}
+                    onChange={(e) =>
+                        setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                    }
+                    maxLength={6}
+                    className="h-11 text-center tracking-widest text-lg pl-10"
+                />
+            </div>
 
             <Button
                 onClick={handleVerify}

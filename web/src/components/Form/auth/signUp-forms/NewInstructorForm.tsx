@@ -22,7 +22,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, User, Mail, Lock, Phone, MapPin, FileText, Briefcase, Award } from "lucide-react";
 
 import ROUTES from "@/lib/CONSTANTS/ROUTES";
 import { secureLocalStorage } from "@/lib/utils/encryption";
@@ -151,11 +151,14 @@ export default function NewInstructorForm() {
                                 <FormItem>
                                     <FormLabel className="text-sm font-medium">Full Name *</FormLabel>
                                     <FormControl>
-                                        <Input
-                                            placeholder="John Doe"
-                                            {...field}
-                                            className="h-11 rounded-lg text-sm"
-                                        />
+                                        <div className="relative">
+                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                placeholder="John Doe"
+                                                {...field}
+                                                className="h-11 rounded-lg text-sm pl-10"
+                                            />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -171,12 +174,15 @@ export default function NewInstructorForm() {
                                         Email Address *
                                     </FormLabel>
                                     <FormControl>
-                                        <Input
-                                            type="email"
-                                            placeholder="john@example.com"
-                                            {...field}
-                                            className="h-11 rounded-lg text-sm"
-                                        />
+                                        <div className="relative">
+                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                type="email"
+                                                placeholder="john@example.com"
+                                                {...field}
+                                                className="h-11 rounded-lg text-sm pl-10"
+                                            />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -191,11 +197,12 @@ export default function NewInstructorForm() {
                                     <FormLabel className="text-sm font-medium">Password *</FormLabel>
                                     <FormControl>
                                         <div className="relative">
+                                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                             <Input
                                                 type={showPassword ? "text" : "password"}
                                                 placeholder="••••••••"
                                                 {...field}
-                                                className="h-11 rounded-lg text-sm pr-10"
+                                                className="h-11 rounded-lg text-sm pl-10 pr-10"
                                             />
                                             <button
                                                 type="button"
@@ -225,16 +232,19 @@ export default function NewInstructorForm() {
                                 <FormItem>
                                     <FormLabel className="text-sm font-medium">Phone Number</FormLabel>
                                     <FormControl>
-                                        <Input
-                                            type="tel"
-                                            placeholder="9876543210"
-                                            {...field}
-                                            value={field.value || ""}
-                                            className="h-11 rounded-lg text-sm"
-                                            maxLength={10}
-                                            pattern="[0-9]*"
-                                            inputMode="numeric"
-                                        />
+                                        <div className="relative">
+                                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                type="tel"
+                                                placeholder="9876543210"
+                                                {...field}
+                                                value={field.value || ""}
+                                                className="h-11 rounded-lg text-sm pl-10"
+                                                maxLength={10}
+                                                pattern="[0-9]*"
+                                                inputMode="numeric"
+                                            />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -248,19 +258,20 @@ export default function NewInstructorForm() {
                                 <FormItem>
                                     <FormLabel className="text-sm font-medium">Address</FormLabel>
                                     <FormControl>
-                                        <Input
-                                            placeholder="123 Main Street, City"
-                                            {...field}
-                                            value={field.value || ""}
-                                            className="h-11 rounded-lg text-sm"
-                                        />
+                                        <div className="relative">
+                                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                placeholder="123 Main Street, City"
+                                                {...field}
+                                                value={field.value || ""}
+                                                className="h-11 rounded-lg text-sm pl-10"
+                                            />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
-                        />
-
-                        <Button
+                        />                        <Button
                             type="button"
                             onClick={goToStep2}
                             className="w-full h-11 font-semibold rounded-lg"
@@ -290,7 +301,10 @@ export default function NewInstructorForm() {
                                 <FormItem>
                                     <FormLabel>Bio *</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Short bio about you" {...field} />
+                                        <div className="relative">
+                                            <FileText className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input placeholder="Short bio about you" {...field} className="pl-10" />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -304,21 +318,25 @@ export default function NewInstructorForm() {
                                 <FormItem>
                                     <FormLabel>Expertise (comma separated) *</FormLabel>
                                     <FormControl>
-                                        <Input
-                                            placeholder="React, Node, Algorithms"
-                                            value={expertiseInput}
-                                            onChange={(e) => {
-                                                const value = e.target.value;
-                                                setExpertiseInput(value);
-                                                const expertise = value
-                                                    .split(",")
-                                                    .map((s) => s.trim())
-                                                    .filter(Boolean);
-                                                form.setValue("instructorProfile.expertise", expertise, {
-                                                    shouldValidate: true
-                                                });
-                                            }}
-                                        />
+                                        <div className="relative">
+                                            <Award className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                placeholder="React, Node, Algorithms"
+                                                value={expertiseInput}
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    setExpertiseInput(value);
+                                                    const expertise = value
+                                                        .split(",")
+                                                        .map((s) => s.trim())
+                                                        .filter(Boolean);
+                                                    form.setValue("instructorProfile.expertise", expertise, {
+                                                        shouldValidate: true
+                                                    });
+                                                }}
+                                                className="pl-10"
+                                            />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -332,15 +350,19 @@ export default function NewInstructorForm() {
                                 <FormItem>
                                     <FormLabel>Experience (years) *</FormLabel>
                                     <FormControl>
-                                        <Input
-                                            type="number"
-                                            placeholder="2"
-                                            value={field.value ?? ""}
-                                            onChange={(e) => {
-                                                const num = e.target.value ? Number(e.target.value) : 0;
-                                                field.onChange(num);
-                                            }}
-                                        />
+                                        <div className="relative">
+                                            <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                type="number"
+                                                placeholder="2"
+                                                value={field.value ?? ""}
+                                                onChange={(e) => {
+                                                    const num = e.target.value ? Number(e.target.value) : 0;
+                                                    field.onChange(num);
+                                                }}
+                                                className="pl-10"
+                                            />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

@@ -1,12 +1,12 @@
 "use client";
 
 import {
-    loginSchema,
-    type SigninFormInput,
+    resetPasswordVerifySchema,
+    type ResetPasswordVerifyInput,
 } from "@/validators/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 import {
@@ -20,77 +20,60 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, Loader2, Mail, Lock, KeyRound } from "lucide-react";
 
 import ROUTES from "@/lib/CONSTANTS/ROUTES";
 import authMutations from "@/services/auth/mutations";
 import { AxiosError } from "axios";
-import { secureLocalStorage } from "@/lib/utils/encryption";
 
-type SigninForm = SigninFormInput;
+type ResetPasswordVerifyForm = ResetPasswordVerifyInput;
 
-export default function SigninForm() {
+export default function ResetPasswordVerifyForm() {
     const [showPassword, setShowPassword] = useState(false);
-    const [rememberMe, setRememberMe] = useState(false);
     const router = useRouter();
-    const loginMutation = authMutations.useLogin();
+    const searchParams = useSearchParams();
+    const verifyOtpMutation = authMutations.useVerifyResetPasswordOtp();
 
-    const form = useForm<SigninForm>({
-        resolver: zodResolver(loginSchema),
+    const form = useForm<ResetPasswordVerifyForm>({
+        resolver: zodResolver(resetPasswordVerifySchema),
         defaultValues: {
             email: "",
-            password: "",
+            otp: "",
+            newPassword: "",
         },
         mode: "onBlur",
     });
 
-    // ✅ On mount: check for saved credentials
+    // Pre-fill email from query params
     useEffect(() => {
-        const savedCredentials = secureLocalStorage.getItem<SigninForm>("userCredentials");
-        const rememberFlag = secureLocalStorage.getItem<boolean>("rememberMe");
-
-        if (savedCredentials && rememberFlag) {
-            // async microtask avoids synchronous render
-            setTimeout(() => {
-                form.setValue("email", savedCredentials.email);
-                form.setValue("password", savedCredentials.password);
-                setRememberMe(true);
-            }, 0);
+        const email = searchParams.get("email");
+        if (email) {
+            form.setValue("email", email);
         }
-    }, [form]);
+    }, [searchParams, form]);
 
-
-    const onSubmit = async (data: SigninForm) => {
-        console.log("🚀 Login form submitted:", data);
-        console.log("📌 Remember Me:", rememberMe);
+    const onSubmit = async (data: ResetPasswordVerifyForm) => {
+        console.log("🚀 Reset password verify submitted:", { ...data, newPassword: "***" });
 
         try {
-            const result = await loginMutation.mutateAsync(data);
-            console.log("✅ Login successful:", result);
+            const result = await verifyOtpMutation.mutateAsync(data);
+            console.log("✅ Password reset successful:", result);
 
-            if (rememberMe) {
-                secureLocalStorage.setItem("userCredentials", data);
-                secureLocalStorage.setItem("rememberMe", true);
-            } else {
-                secureLocalStorage.removeItem("userCredentials");
-                secureLocalStorage.removeItem("rememberMe");
-            }
-
-            router.push(ROUTES.HOME);
+            // Navigate to login page
+            router.push(ROUTES.AUTH.LOGIN);
         } catch (error) {
-            console.error("❌ Login failed:", error);
+            console.error("❌ Password reset failed:", error);
             if (error instanceof AxiosError && error.response) {
-                const { status } = error.response;
-                if (status === 404) {
+                const { status, data: errorData } = error.response;
+                if (status === 400) {
+                    form.setError("otp", {
+                        type: "manual",
+                        message: errorData?.message || "Invalid or expired OTP",
+                    });
+                } else if (status === 404) {
                     form.setError("email", {
                         type: "manual",
-                        message: "User not found. Please sign up first.",
-                    });
-                } else if (status === 401) {
-                    form.setError("password", {
-                        type: "manual",
-                        message: "Invalid password. Please try again.",
+                        message: "User not found",
                     });
                 }
             }
@@ -115,9 +98,10 @@ export default function SigninForm() {
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                     <Input
                                         type="email"
-                                        placeholder="student1@gmail.com"
+                                        placeholder="user1@gmail.com"
                                         {...field}
                                         className="h-11 rounded-lg text-sm pl-10"
+                                        readOnly
                                     />
                                 </div>
                             </FormControl>
@@ -128,10 +112,33 @@ export default function SigninForm() {
 
                 <FormField
                     control={form.control}
-                    name="password"
+                    name="otp"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-sm font-medium">Password *</FormLabel>
+                            <FormLabel className="text-sm font-medium">OTP Code *</FormLabel>
+                            <FormControl>
+                                <div className="relative">
+                                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        type="text"
+                                        placeholder="812775"
+                                        maxLength={6}
+                                        {...field}
+                                        className="h-11 rounded-lg text-sm pl-10 tracking-widest"
+                                    />
+                                </div>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="newPassword"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel className="text-sm font-medium">New Password *</FormLabel>
                             <FormControl>
                                 <div className="relative">
                                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -159,49 +166,30 @@ export default function SigninForm() {
                     )}
                 />
 
-                {/* ✅ Remember Me Checkbox */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                        <Checkbox
-                            id="rememberMe"
-                            checked={rememberMe}
-                            onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                        />
-                        <label
-                            htmlFor="rememberMe"
-                            className="text-sm font-medium leading-none cursor-pointer"
-                        >
-                            Remember me for 30 days
-                        </label>
-                    </div>
-                    {/* Reset password */}
-                    <div className="text-right">
-                        <a
-                            href={ROUTES.AUTH.RESET_PASSWORD}
-                            className="text-sm text-primary hover:underline"
-                        >
-                            Forgot password?
-                        </a>
-                    </div>
-
-                </div>
-
-
-
                 <Button
                     type="submit"
-                    disabled={loginMutation.isPending}
+                    disabled={verifyOtpMutation.isPending}
                     className="w-full h-11 font-semibold rounded-lg"
                 >
-                    {loginMutation.isPending ? (
+                    {verifyOtpMutation.isPending ? (
                         <>
                             <Loader2 className="animate-spin mr-2 h-4 w-4" />
-                            Signing In...
+                            Resetting Password...
                         </>
                     ) : (
-                        "Sign In"
+                        "Reset Password"
                     )}
                 </Button>
+
+                <div className="text-center text-sm text-muted-foreground">
+                    Remember your password?{" "}
+                    <a
+                        href={ROUTES.AUTH.LOGIN}
+                        className="text-primary hover:underline font-medium"
+                    >
+                        Sign in
+                    </a>
+                </div>
             </form>
         </Form>
     );

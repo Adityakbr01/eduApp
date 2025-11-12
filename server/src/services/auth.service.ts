@@ -244,7 +244,7 @@ const authService = {
         };
     },
     loginUserService: async (email: string, password: string) => {
-        console.log(`🔐 Login attempt for email: ${email}`);
+        logger.info(`🔐 Login attempt for email: ${email}`);
 
         const user = await User.findOne({ email }).select("+password +isEmailVerified +isBanned +approvalStatus") as any;
 
@@ -275,13 +275,13 @@ const authService = {
             });
         }
 
-        console.log(`✅ Password valid for user: ${user._id}`);
-        console.log(`🎫 Generating tokens for user: ${user._id}`);
+        logger.info(`✅ Password valid for user: ${user._id}`);
+        logger.info(`🎫 Generating tokens for user: ${user._id}`);
 
         const accessToken = user.generateAccessToken();
         const refreshToken = user.generateRefreshToken();
 
-        console.log(`📝 Refresh Token generated (first 20 chars): ${refreshToken.substring(0, 20)}...`);
+        logger.info(`📝 Refresh Token generated (first 20 chars): ${refreshToken.substring(0, 20)}...`);
 
         try {
             await sessionService.createSession(String(user._id), refreshToken);
@@ -431,8 +431,8 @@ const authService = {
         };
     },
     refreshTokenService: async (refreshToken: string) => {
-        console.log(`🔄 Refresh token request`);
-        console.log(`📝 Refresh Token received (first 20 chars): ${refreshToken ? refreshToken.substring(0, 20) + '...' : 'MISSING'}`);
+        logger.info(`🔄 Refresh token request`);
+        logger.info(`📝 Refresh Token received (first 20 chars): ${refreshToken ? refreshToken.substring(0, 20) + '...' : 'MISSING'}`);
 
         if (!refreshToken) {
             throw new ApiError({
@@ -448,9 +448,9 @@ const authService = {
                 refreshToken,
                 _config.JWT_REFRESH_TOKEN_SECRET!
             ) as { userId: string };
-            console.log(`✅ JWT signature valid for user: ${decoded.userId}`);
+            logger.info(`✅ JWT signature valid for user: ${decoded.userId}`);
         } catch (err) {
-            console.log(`❌ JWT verification failed:`, err);
+            logger.info(`❌ JWT verification failed:`, err);
             throw new ApiError({
                 statusCode: 401,
                 message: "Invalid or expired refresh token",
@@ -464,11 +464,11 @@ const authService = {
             });
         }
 
-        console.log(`🔍 Validating session in Redis for user: ${decoded.userId}`);
+        logger.info(`🔍 Validating session in Redis for user: ${decoded.userId}`);
         const sessionIsValid = await sessionService.validateSession(decoded.userId, refreshToken);
 
         if (!sessionIsValid) {
-            console.log(`❌ Session validation failed - User may have logged in on another device`);
+            logger.info(`❌ Session validation failed - User may have logged in on another device`);
             throw new ApiError({
                 statusCode: 401,
                 message: "Session expired or logged in on another device. Please login again.",

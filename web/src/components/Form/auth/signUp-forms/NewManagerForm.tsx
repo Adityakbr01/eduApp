@@ -22,7 +22,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, User, Mail, Lock, Phone, MapPin, Building2, Users } from "lucide-react";
 
 import ROUTES from "@/lib/CONSTANTS/ROUTES";
 import { secureLocalStorage } from "@/lib/utils/encryption";
@@ -204,7 +204,10 @@ export default function NewManagerForm() {
                                 <FormItem>
                                     <FormLabel>Full Name *</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="John Doe" {...field} />
+                                        <div className="relative">
+                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input placeholder="John Doe" {...field} className="pl-10" />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -218,7 +221,10 @@ export default function NewManagerForm() {
                                 <FormItem>
                                     <FormLabel>Email Address *</FormLabel>
                                     <FormControl>
-                                        <Input type="email" placeholder="john@example.com" {...field} />
+                                        <div className="relative">
+                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input type="email" placeholder="john@example.com" {...field} className="pl-10" />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -233,11 +239,12 @@ export default function NewManagerForm() {
                                     <FormLabel>Password *</FormLabel>
                                     <FormControl>
                                         <div className="relative">
+                                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                             <Input
                                                 type={showPassword ? "text" : "password"}
                                                 placeholder="••••••••"
                                                 {...field}
-                                                className="pr-10"
+                                                className="pl-10 pr-10"
                                             />
                                             <button
                                                 type="button"
@@ -267,7 +274,10 @@ export default function NewManagerForm() {
                                 <FormItem>
                                     <FormLabel>Phone Number</FormLabel>
                                     <FormControl>
-                                        <Input type="tel" placeholder="9876543210" {...field} />
+                                        <div className="relative">
+                                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input type="tel" placeholder="9876543210" {...field} className="pl-10" />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -281,7 +291,10 @@ export default function NewManagerForm() {
                                 <FormItem>
                                     <FormLabel>Address</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="123 Main Street, City" {...field} />
+                                        <div className="relative">
+                                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input placeholder="123 Main Street, City" {...field} className="pl-10" />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -318,7 +331,10 @@ export default function NewManagerForm() {
                                 <FormItem>
                                     <FormLabel>Department *</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Engineering, Sales, Marketing" {...field} />
+                                        <div className="relative">
+                                            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input placeholder="Engineering, Sales, Marketing" {...field} className="pl-10" />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -332,12 +348,16 @@ export default function NewManagerForm() {
                                 <FormItem>
                                     <FormLabel>Team Size *</FormLabel>
                                     <FormControl>
-                                        <Input
-                                            type="number"
-                                            placeholder="5"
-                                            value={Number(field.value) || 0}
-                                            onChange={(e) => field.onChange(Number(e.target.value) || 0)}
-                                        />
+                                        <div className="relative">
+                                            <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                type="number"
+                                                placeholder="5"
+                                                value={Number(field.value) || 0}
+                                                onChange={(e) => field.onChange(Number(e.target.value) || 0)}
+                                                className="pl-10"
+                                            />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
