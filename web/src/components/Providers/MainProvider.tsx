@@ -1,25 +1,21 @@
 "use client";
-import React from "react";
-import ReactToast from "./ReactToast";
-import { TanStackProvider } from "./TanStackProvider";
 import { useInitUser } from "@/services/auth/useInitUser";
+import React, { useEffect } from "react";
+import ReactToast from "./ReactToast";
 
-// Separate component for auth initialization
-function AuthInitializer() {
-
-    useInitUser();
-    return null;
-}
 
 function MainProvider({ children }: { children: React.ReactNode }) {
+    useEffect(() => {
+        console.log("🚀 MainProvider mounted - App started");
+    }, []);
+
+    useInitUser();
+
     return (
-        <TanStackProvider>
-            <main className="max-w-8xl mx-auto w-full h-full">
-                <AuthInitializer />
-                {children}
-                <ReactToast />
-            </main>
-        </TanStackProvider>
+        <main className="max-w-8xl mx-auto w-full h-full">
+            {children}
+            <ReactToast />
+        </main>
     );
 }
 

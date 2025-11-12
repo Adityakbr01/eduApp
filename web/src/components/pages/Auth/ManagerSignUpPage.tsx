@@ -3,16 +3,12 @@
 import Link from "next/link";
 import { useRef } from "react";
 
-
-
-import NewStudentForm from "@/components/Form/auth/signUp-forms/NewStudentForm";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
+import NewManagerForm from "@/components/Form/auth/signUp-forms/NewManagerForm";
 import ROUTES from "@/lib/CONSTANTS/ROUTES";
 
-function StudentSignUpPage() {
-
-
+function ManagerSignUpPage() {
     //Animation
     const formWrapperRef = useRef<HTMLDivElement>(null);
     const smoke1Ref = useRef(null);
@@ -52,10 +48,6 @@ function StudentSignUpPage() {
         );
     }, []);
 
-
-
-
-
     return (
         <div className="w-full relative z-20 overflow-hidden  min-h-screen flex items-center justify-center p-0">
             <div ref={formWrapperRef} className="w-full h-full max-w-md md:rounded-2xl overflow-hidden shadow-xs md:border-y">
@@ -71,10 +63,10 @@ function StudentSignUpPage() {
                             </Link>
                         </p>
                     </div>
-                    <NewStudentForm />
+                    <NewManagerForm />
                 </div>
             </div>
-            <div ref={smoke1Ref} className="fluid-container absolute z-10 bg-[#1b80ed6c] h-[90vh] w-[90vh] rounded-full -top-[50vh] -right-[90vh] blur-[40vh]">
+            <div ref={smoke1Ref} className="fluid-container absolute z-10 bg-[#1b80ed9b] h-[90vh] w-[90vh] rounded-full -top-[50vh] -right-[90vh] blur-[40vh]">
             </div>
             <div ref={smoke2Ref} className="fluid-container absolute z-10 bg-[#a1b6cd51] h-[90vh] w-[90vh] rounded-full -bottom-[50vh] -left-[90vh] blur-[40vh]">
             </div>
@@ -83,4 +75,4 @@ function StudentSignUpPage() {
     );
 }
 
-export default StudentSignUpPage;
+export default ManagerSignUpPage;

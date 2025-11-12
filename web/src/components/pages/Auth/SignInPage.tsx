@@ -5,12 +5,12 @@ import { useRef } from "react";
 
 
 
-import NewStudentForm from "@/components/Form/auth/signUp-forms/NewStudentForm";
+import LoginForm from "@/components/Form/auth/signIn-form/SigninForm";
+import ROUTES from "@/lib/CONSTANTS/ROUTES";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
-import ROUTES from "@/lib/CONSTANTS/ROUTES";
 
-function StudentSignUpPage() {
+function SignInPage() {
 
 
     //Animation
@@ -23,34 +23,26 @@ function StudentSignUpPage() {
 
         tl.from(formWrapperRef.current, {
             opacity: 0,
-            y: 40,
-            scale: 0.95,
-            duration: 1,
-            ease: "power3.out",
+            y: 30,
+            scale: 0.96,
+            filter: "blur(10px)",
+            duration: 0.5,
+            ease: "power2.out",
         });
 
         tl.from(
-            smoke1Ref.current,
+            [smoke1Ref.current, smoke2Ref.current],
             {
                 opacity: 0,
-                x: 80,
-                duration: 0.5,
-                ease: "linear",
+                scale: 0.8,
+                duration: 1.2,
+                ease: "sine.out",
+                stagger: 0.2,
             },
-            "smokes" // label
-        );
-
-        tl.from(
-            smoke2Ref.current,
-            {
-                opacity: 0,
-                x: -80,
-                duration: 0.5,
-                ease: "linear",
-            },
-            "smokes"
+            "-=0.5"
         );
     }, []);
+
 
 
 
@@ -65,13 +57,13 @@ function StudentSignUpPage() {
                             Sign Up
                         </h1>
                         <p className="text-sm text-muted-foreground">
-                            Already have an account?{" "}
-                            <Link href={ROUTES.AUTH.LOGIN} className="text-blue-600 font-semibold">
-                                Sign In
+                            I don&apos;t have an account?{" "}
+                            <Link href={ROUTES.AUTH.REGISTER_NEW_STUDENT} className="text-blue-600 font-semibold">
+                                Sign Up
                             </Link>
                         </p>
                     </div>
-                    <NewStudentForm />
+                    <LoginForm />
                 </div>
             </div>
             <div ref={smoke1Ref} className="fluid-container absolute z-10 bg-[#1b80ed6c] h-[90vh] w-[90vh] rounded-full -top-[50vh] -right-[90vh] blur-[40vh]">
@@ -83,4 +75,4 @@ function StudentSignUpPage() {
     );
 }
 
-export default StudentSignUpPage;
+export default SignInPage;

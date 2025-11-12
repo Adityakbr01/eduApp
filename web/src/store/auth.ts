@@ -47,7 +47,16 @@ const getPersistedToken = (): string | null => {
 export const useAuthStore = create<AuthState>((set) => ({
     accessToken: getPersistedToken(),
     user: getUserFromLocalStorage(),
-    setAccessToken: (token) => set({ accessToken: token }),
+    setAccessToken: (token) => {
+        set({ accessToken: token });
+        if (typeof window !== "undefined") {
+            if (token) {
+                secureLocalStorage.setItem("accessToken", token);
+            } else {
+                secureLocalStorage.removeItem("accessToken");
+            }
+        }
+    },
     setUser: (user) => {
         set({ user });
         if (typeof window !== "undefined") {

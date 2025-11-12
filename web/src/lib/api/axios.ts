@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/auth"; // adjust the path as needed
 
 const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001/api/v1",
+    baseURL: "http://localhost:3001/api/v1", //  todo : add env variable
     withCredentials: true, // ensures cookies (refresh token) are sent
 });
 
@@ -65,7 +65,7 @@ api.interceptors.response.use(
 
             try {
                 const { data } = await axios.post(
-                    `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001/api/v1"}/auth/refresh-token`,
+                    `http://localhost:3001/api/v1/auth/token-refresh`,
                     {},
                     { withCredentials: true }
                 );

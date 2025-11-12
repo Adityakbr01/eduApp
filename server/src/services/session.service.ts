@@ -26,6 +26,8 @@ class SessionService {
      * Overwrites any existing session (enforces single device login)
      */
     async createSession(userId: string, refreshToken: string): Promise<void> {
+        console.log(`🔐 Creating session for user: ${userId}`);
+
         const sessionKey = this.getSessionKey(userId);
         const ttl = _config.JWT_REFRESH_TOKEN_EXPIRES_IN_SECONDS;
         const now = Date.now();
@@ -38,6 +40,7 @@ class SessionService {
         };
 
         await cacheManager.set(sessionKey, sessionData, ttl);
+        console.log(`✅ Session created successfully for user: ${userId}, expires in ${ttl}s`);
     }
 
     /**
@@ -45,21 +48,33 @@ class SessionService {
      * Returns true if valid, false otherwise
      */
     async validateSession(userId: string, refreshToken: string): Promise<boolean> {
+        console.log(`🔍 Validating session for user: ${userId}`);
+
         const sessionKey = this.getSessionKey(userId);
         const sessionData = await cacheManager.get(sessionKey) as SessionData | null;
 
         if (!sessionData) {
+            console.log(`❌ No session found for user: ${userId}`);
             return false;
         }
 
         // Check if session has expired
         if (sessionData.expiresAt < Date.now()) {
+            console.log(`❌ Session expired for user: ${userId}`);
             await this.deleteSession(userId);
             return false;
         }
 
         // Verify refresh token matches
-        return sessionData.refreshToken === refreshToken;
+        const isValid = sessionData.refreshToken === refreshToken;
+
+        if (isValid) {
+            console.log(`✅ Session valid for user: ${userId}`);
+        } else {
+            console.log(`❌ Refresh token mismatch for user: ${userId} - User logged in on another device`);
+        }
+
+        return isValid;
     }
 
     /**
@@ -74,8 +89,10 @@ class SessionService {
      * Delete user session from Redis
      */
     async deleteSession(userId: string): Promise<void> {
+        console.log(`🗑️ Deleting session for user: ${userId}`);
         const sessionKey = this.getSessionKey(userId);
         await cacheManager.del(sessionKey);
+        console.log(`✅ Session deleted for user: ${userId}`);
     }
 
     /**

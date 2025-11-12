@@ -95,6 +95,8 @@ export default function VerifyOtpForm() {
                 onSuccess: () => {
                     secureLocalStorage.removeItem("authStep");
                     secureLocalStorage.removeItem("registerData");
+                    secureLocalStorage.removeItem("registerFormData");
+                    secureLocalStorage.removeItem("authStep");
                     router.push(ROUTES.AUTH.LOGIN);
                 },
             }

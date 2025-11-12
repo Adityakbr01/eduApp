@@ -7,11 +7,11 @@ function page() {
     <div>
       <Link href={ROUTES.AUTH.REGISTER_NEW_STUDENT}>Sign up User</Link>
       <br />
-      <Link href='/signup/newMentor'>Sign up mentor</Link>
+      <Link href={ROUTES.AUTH.REGISTER_NEW_INSTRUCTOR}>Sign up mentor</Link>
       <br />
-      <Link href="/signup/newSupport">Sign up Support</Link>
+      <Link href={ROUTES.AUTH.REGISTER_NEW_SUPPORT}>Sign up Support</Link>
       <br />
-      <Link href="/signup/newManager">Sign up Manager</Link>
+      <Link href={ROUTES.AUTH.REGISTER_NEW_MANAGER}>Sign up Manager</Link>
       <br />
     </div>
   )

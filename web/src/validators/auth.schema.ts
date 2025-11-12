@@ -30,10 +30,13 @@ const baseSchema = {
         .regex(/[A-Z]/, "Must include at least one uppercase letter")
         .regex(/[a-z]/, "Must include at least one lowercase letter")
         .regex(/[0-9]/, "Must include at least one number"),
-    phone: z.string().optional().refine(
-        (value) => !value || /^[0-9]{10}$/.test(value),
-        "Invalid phone format"
-    ),
+    phone: z
+        .string()
+        .optional()
+        .refine(
+            (value) => !value || /^[0-9]{10}$/.test(value),
+            "Phone must be 10 digits"
+        ),
     address: z.string().optional(),
 };
 
@@ -109,7 +112,11 @@ export const changePasswordSchema = z.object({
 
 // Export types
 export type RegisterSchemaInput = z.infer<typeof registerSchema>;
-export type LoginSchemaInput = z.infer<typeof loginSchema>;
+export type SigninFormInput = z.infer<typeof loginSchema>;
+export type StudentRegisterInput = z.infer<typeof registerSchema> & { role: typeof ROLES.STUDENT };
+export type InstructorRegisterInput = z.infer<typeof registerSchema> & { role: typeof ROLES.INSTRUCTOR };
+export type ManagerRegisterInput = z.infer<typeof registerSchema> & { role: typeof ROLES.MANAGER };
+export type SupportRegisterInput = z.infer<typeof registerSchema> & { role: typeof ROLES.SUPPORT };
 
 
 
