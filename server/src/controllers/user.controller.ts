@@ -5,17 +5,13 @@ import { wrapAsync } from "src/utils/wrapAsync.js";
 const userController = {
     getAllUsers: wrapAsync(async (req, res) => {
         const result = await userService.getAllUsers();
-        ApiResponder.success(res, 200, "Users fetched successfully", {
-            message: result.message,
-            data: result.data,
-        });
+        ApiResponder.success(res, 200, result.message, result.users);
     }),
     getUserById: wrapAsync(async (req, res) => {
         const userId = req.params.id;
         const result = await userService.getUserById(userId);
         ApiResponder.success(res, 200, "User fetched successfully", {
-            message: result.message,
-            data: result.data,
+            user: result.user,
         });
     }),
     updateUserById: wrapAsync(async (req, res) => {
@@ -34,7 +30,7 @@ const userController = {
             data: result.data,
         });
     }),
-    
+
     // Roles and Permissions
     getRolesAndPermissions: wrapAsync(async (req, res) => {
         const result = await userService.getRolesAndPermissions();

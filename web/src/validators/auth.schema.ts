@@ -11,7 +11,7 @@ export const ROLES = {
 
 export type Role = (typeof ROLES)[keyof typeof ROLES];
 
-const RoleEnum = z.enum([
+export const RoleEnum = z.enum([
     ROLES.STUDENT,
     ROLES.MANAGER,
     ROLES.INSTRUCTOR,

@@ -21,6 +21,17 @@ function Page() {
       <br />
       <Link href={ROUTES.AUTH.REGISTER_NEW_MANAGER}>Sign up Manager</Link>
       <br />
+
+
+      <h2 className='mt-24'>DashBoards</h2>
+      <Link href={ROUTES.DASHBOARD.ADMIN}>Admin Dashboard</Link>
+      <br />
+      <Link href={ROUTES.DASHBOARD.INSTRUCTOR}>Instructor Dashboard</Link>
+      <br />
+      <Link href={ROUTES.DASHBOARD.SUPPORT}>Support Dashboard</Link>
+      <br />
+      <Link href={ROUTES.DASHBOARD.MANAGER}>Manager Dashboard</Link>
+      <br />
     </div>
   )
 }

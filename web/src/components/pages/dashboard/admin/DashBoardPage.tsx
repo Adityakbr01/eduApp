@@ -1,0 +1,391 @@
+"use client";
+
+import {
+    Activity,
+    Bell,
+    LogOut,
+    Plus,
+    Search,
+    Settings,
+    Shield,
+    Users,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
+import type { User } from "@/services/auth";
+import { usersQueries } from "@/services/users";
+import { approvalStatusEnum } from "@/store/auth";
+import UsersPage from "./UsersPage";
+import type { StatusMeta, UserRow } from "./types";
+
+const sidebarItems = [
+    { label: "Overview", icon: Activity, value: "overview" },
+    { label: "Users", icon: Users, value: "users" },
+    { label: "Permissions", icon: Shield, value: "permissions" },
+    { label: "Settings", icon: Settings, value: "settings" },
+];
+
+const quickStats = [
+    { label: "Total Users", value: "1,294", trend: "+8% vs last week" },
+    { label: "Active Sessions", value: "412", trend: "–3% vs last week" },
+    { label: "Pending Invites", value: "27", trend: "+5 new today" },
+];
+
+const mockUsers: UserRow[] = [
+    {
+        id: "USR-9081",
+        name: "Ananya Sharma",
+        email: "ananya@eduapp.com",
+        roleLabel: "Admin",
+        status: { label: "Active", className: "bg-emerald-100 text-emerald-800" },
+        lastActive: "2 hours ago",
+    },
+    {
+        id: "USR-1023",
+        name: "Rishi Patel",
+        email: "rishi@eduapp.com",
+        roleLabel: "Instructor",
+        status: { label: "Pending invite", className: "bg-amber-100 text-amber-800" },
+        lastActive: "Pending invite",
+    },
+    {
+        id: "USR-7610",
+        name: "Sana Fakih",
+        email: "sana@eduapp.com",
+        roleLabel: "Student",
+        status: { label: "Active", className: "bg-emerald-100 text-emerald-800" },
+        lastActive: "5 mins ago",
+    },
+    {
+        id: "USR-5508",
+        name: "Dev Malhotra",
+        email: "dev@eduapp.com",
+        roleLabel: "Student",
+        status: { label: "Suspended", className: "bg-rose-100 text-rose-800" },
+        lastActive: "Suspended",
+    },
+];
+
+const permissionScopes = [
+    { key: "read", label: "Read" },
+    { key: "invite", label: "Invite" },
+    { key: "update", label: "Update" },
+    { key: "delete", label: "Delete" },
+] as const;
+
+type PermissionKey = (typeof permissionScopes)[number]["key"];
+
+type RolePermission = {
+    role: string;
+    description: string;
+    permissions: Record<PermissionKey, boolean>;
+};
+
+const initialRolePermissions: RolePermission[] = [
+
+    {
+        role: "Admin",
+        description: "Manage users & courses & full platform",
+        permissions: {
+            read: true,
+            invite: true,
+            update: true,
+            delete: false,
+        },
+    },
+    {
+        role: "instructor",
+        description: "Assist instructors",
+        permissions: {
+            read: true,
+            invite: false,
+            update: true,
+            delete: false,
+        },
+    },
+];
+
+const statusPalette = {
+    success: "bg-emerald-100 text-emerald-800",
+    warning: "bg-amber-100 text-amber-800",
+    danger: "bg-rose-100 text-rose-800",
+    info: "bg-blue-100 text-blue-800",
+};
+
+const formatLastActive = (timestamp?: string): string => {
+    if (!timestamp) return "—";
+    try {
+        const date = new Date(timestamp);
+        if (Number.isNaN(date.getTime())) return "—";
+        return new Intl.DateTimeFormat("en-IN", {
+            dateStyle: "medium",
+            timeStyle: "short",
+        }).format(date);
+    } catch {
+        return "—";
+    }
+};
+
+const getStatusMeta = (user: User): StatusMeta => {
+    if (user.isBanned) {
+        return { label: "Banned", className: statusPalette.danger };
+    }
+    if (user.approvalStatus === approvalStatusEnum.REJECTED) {
+        return { label: "Rejected", className: statusPalette.danger };
+    }
+    if (user.approvalStatus === approvalStatusEnum.PENDING) {
+        return { label: "Pending approval", className: statusPalette.warning };
+    }
+    if (!user.isEmailVerified) {
+        return { label: "Email unverified", className: statusPalette.info };
+    }
+    return { label: "Active", className: statusPalette.success };
+};
+
+const mapApiUserToRow = (user: User): UserRow => ({
+    id: user._id,
+    name: user.name || "Unnamed",
+    email: user.email,
+    roleLabel: user.roleId?.name || "Unknown role",
+    status: getStatusMeta(user),
+    lastActive: formatLastActive(user.updatedAt ?? user.createdAt),
+});
+
+function DashBoardPage() {
+    const {
+        data: usersData,
+        isLoading: isLoadingUsers,
+        isError: isUsersError,
+        error: usersError,
+    } = usersQueries.useGetUsers();
+    const [activeSection, setActiveSection] = useState(sidebarItems[1].value);
+    const [rolePermissions, setRolePermissions] = useState<RolePermission[]>(initialRolePermissions);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [filterRole, setFilterRole] = useState<string | null>(null);
+
+    const sectionTitle = useMemo(() => {
+        const selected = sidebarItems.find((item) => item.value === activeSection);
+        return selected?.label ?? "Users";
+    }, [activeSection]);
+
+    const stats = useMemo(() => {
+        if (!usersData || usersData.length === 0) {
+            return quickStats;
+        }
+        const totalUsers = usersData.length;
+        const verifiedUsers = usersData.filter((user: User) => user.isEmailVerified).length;
+        const pendingApprovals = usersData.filter((user: User) => user.approvalStatus === approvalStatusEnum.PENDING).length;
+        const bannedUsers = usersData.filter((user: User) => user.isBanned).length;
+
+        return [
+            {
+                label: "Total Users",
+                value: totalUsers.toLocaleString(),
+                trend: `${verifiedUsers} verified accounts`,
+            },
+            {
+                label: "Pending Approval",
+                value: pendingApprovals.toLocaleString(),
+                trend: pendingApprovals ? "Needs review" : "All approved",
+            },
+            {
+                label: "Banned Accounts",
+                value: bannedUsers.toLocaleString(),
+                trend: bannedUsers ? "Action required" : "No bans active",
+            },
+        ];
+    }, [usersData]);
+
+    const userRows = useMemo<UserRow[]>(() => {
+        if (!usersData) return [];
+        return usersData.map(mapApiUserToRow);
+    }, [usersData]);
+
+    const shouldFallbackToMock = !usersData && !isLoadingUsers && !isUsersError;
+    let rowsToRender = shouldFallbackToMock ? mockUsers : userRows;
+
+    // Apply search and role filter
+    if (searchQuery.trim() || filterRole) {
+        rowsToRender = rowsToRender.filter((user) => {
+            const matchesSearch = searchQuery.trim() === "" ||
+                user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                user.email.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesRole = !filterRole || user.roleLabel === filterRole;
+            return matchesSearch && matchesRole;
+        });
+    }
+
+    const handleTogglePermission = (role: string, permissionKey: PermissionKey, checked: boolean) => {
+        setRolePermissions((prev) =>
+            prev.map((entry) =>
+                entry.role === role
+                    ? {
+                        ...entry,
+                        permissions: { ...entry.permissions, [permissionKey]: checked },
+                    }
+                    : entry,
+            ),
+        );
+    };
+
+    return (
+        <div className="bg-muted/30 flex min-h-screen">
+            <aside className="hidden w-64 flex-col border-r `bg-linear-to-b from-primary/5 to-background/80 p-6 lg:flex">
+                <div className="mb-8 space-y-2 rounded-lg bg-primary/10 p-3">
+                    <p className="text-xs uppercase text-primary font-semibold">🔐 Admin Panel</p>
+                    <h1 className="text-lg font-bold text-primary">EduApp Admin</h1>
+                    <p className="text-xs text-muted-foreground">Full system control</p>
+                </div>
+                <nav className="space-y-2">
+                    {sidebarItems.map(({ label, icon: Icon, value }) => (
+                        <button
+                            key={value}
+                            onClick={() => setActiveSection(value)}
+                            className={cn(
+                                "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition",
+                                activeSection === value
+                                    ? "bg-primary text-primary-foreground"
+                                    : "text-muted-foreground hover:bg-muted",
+                            )}
+                        >
+                            <Icon className="h-4 w-4" />
+                            {label}
+                        </button>
+                    ))}
+                </nav>
+                <div className="mt-auto space-y-3">
+                    <Separator />
+                    <Button variant="outline" className="w-full justify-start gap-2" size="sm">
+                        <Bell className="h-4 w-4" />
+                        Notifications
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start gap-2 text-destructive" size="sm">
+                        <LogOut className="h-4 w-4" />
+                        Log out
+                    </Button>
+                </div>
+            </aside>
+            <main className="flex-1">
+                <header className="border-b bg-linear-to-r from-primary/5 via-background/80 to-background/80 px-4 py-4 backdrop-blur md:px-8">
+                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                        <div>
+                            <p className="text-sm text-primary font-semibold">🛡️ Admin Dashboard</p>
+                            <h2 className="text-2xl font-bold tracking-tight text-primary">{sectionTitle}</h2>
+                        </div>
+                        <div className="flex flex-col gap-2 sm:flex-row">
+                            {activeSection === "users" && (
+                                <div className="relative w-full max-w-xs">
+                                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+
+                                    <Input
+                                        placeholder="Search users..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="h-9 pl-10 pr-3 text-sm"
+                                    />
+                                </div>
+
+                            )}
+                            <Button className="gap-2">
+                                <Plus className="h-4 w-4" />
+                                Invite user
+                            </Button>
+                        </div>
+                    </div>
+                </header>
+                <div className="space-y-6 px-4 py-6 md:px-8">
+                    {activeSection === "overview" && (
+                        <section className="grid gap-4 md:grid-cols-3">
+                            {stats.map((stat) => (
+                                <Card key={stat.label}>
+                                    <CardHeader>
+                                        <CardDescription>{stat.label}</CardDescription>
+                                        <CardTitle className="text-3xl font-bold">{stat.value}</CardTitle>
+                                    </CardHeader>
+                                    <CardFooter>
+                                        <span className="text-sm text-muted-foreground">{stat.trend}</span>
+                                    </CardFooter>
+                                </Card>
+                            ))}
+                        </section>
+                    )}
+
+                    {activeSection === "users" && (
+                        <UsersPage
+                            filterRole={filterRole}
+                            setFilterRole={setFilterRole}
+                            isLoadingUsers={isLoadingUsers}
+                            isUsersError={isUsersError}
+                            usersError={usersError}
+                            rowsToRender={rowsToRender}
+                        />
+                    )}
+
+
+                    {activeSection === "permissions" && (
+                        <section>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>🔑 Role permissions</CardTitle>
+                                    <CardDescription>Define granular access control for all roles</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="grid grid-cols-[1.5fr_repeat(4,minmax(90px,1fr))] items-center gap-4 text-xs font-medium uppercase text-muted-foreground">
+                                        <span>Role</span>
+                                        {permissionScopes.map((scope) => (
+                                            <span key={scope.key}>{scope.label}</span>
+                                        ))}
+                                    </div>
+                                    <Separator />
+                                    <div className="space-y-4">
+                                        {rolePermissions.map((entry) => (
+                                            <div
+                                                key={entry.role}
+                                                className="grid grid-cols-[1.5fr_repeat(4,minmax(90px,1fr))] items-center gap-4 rounded-xl border p-4"
+                                            >
+                                                <div>
+                                                    <p className="font-medium">{entry.role}</p>
+                                                    <p className="text-sm text-muted-foreground">{entry.description}</p>
+                                                </div>
+                                                {permissionScopes.map((scope) => (
+                                                    <div key={`${entry.role}-${scope.key}`} className="flex items-center justify-center">
+                                                        <Switch
+                                                            checked={entry.permissions[scope.key]}
+                                                            onCheckedChange={(checked) =>
+                                                                handleTogglePermission(entry.role, scope.key, checked)
+                                                            }
+                                                            aria-label={`${scope.label} permission for ${entry.role}`}
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </CardContent>
+                                <CardFooter className="justify-end gap-3">
+                                    <Button variant="outline">Discard</Button>
+                                    <Button>Save changes</Button>
+                                </CardFooter>
+                            </Card>
+                        </section>
+                    )}
+                </div>
+            </main>
+        </div>
+    );
+}
+
+export default DashBoardPage;

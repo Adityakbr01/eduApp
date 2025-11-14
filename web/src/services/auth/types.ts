@@ -1,19 +1,33 @@
 import { approvalStatusEnum } from "@/store/auth";
 
 // Auth Types
+
+
+interface roleIdInterface {
+    createdAt: string;
+    description: string
+    name: string
+    updatedAt: string
+    _id: string
+}
 export interface User {
     _id: string;
     name: string;
     email: string;
     phone?: string;
-    roleId: string;
+    roleId: roleIdInterface;
     roleName: string;
     isEmailVerified: boolean;
     approvalStatus: approvalStatusEnum;
     isBanned: boolean;
     permissions: string[];
     address?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    approvedBy?: string | null;
 }
+
+
 
 // Request Types
 export interface RegisterRequest {

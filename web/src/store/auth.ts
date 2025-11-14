@@ -1,6 +1,7 @@
 // store/auth.ts
 import { create } from "zustand";
 import { secureLocalStorage } from "@/lib/utils/encryption";
+import { User } from "@/services/auth";
 
 export enum approvalStatusEnum {
     PENDING = "PENDING",
@@ -8,19 +9,7 @@ export enum approvalStatusEnum {
     REJECTED = "REJECTED",
 }
 
-export interface User {
-    _id: string;
-    name: string;
-    email: string;
-    roleId: string;
-    roleName: string;
-    isEmailVerified: boolean;
-    approvalStatus: approvalStatusEnum;
-    isBanned: boolean;
-    permissions: string[];
-    phone?: string;
-    address?: string;
-}
+
 
 
 

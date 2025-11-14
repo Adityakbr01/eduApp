@@ -11,6 +11,7 @@ import { cacheKeyFactory } from "src/cache/cacheKeyFactory.js";
 import { TTL } from "src/cache/cacheTTL.js";
 import cacheInvalidation from "src/cache/cacheInvalidation.js";
 import logger from "src/helpers/logger.js";
+import { success } from "zod";
 
 const userService = {
     getAllUsers: async () => {
@@ -22,17 +23,21 @@ const userService = {
             if (cached) {
                 return {
                     message: "Users fetched successfully (cached)",
-                    data: cached,
+                    users: cached,
+                    success: true,
                 };
             }
         } catch (err) {
             logger.warn("cache.get failed in getAllUsers:", err);
         }
 
-        const users = await User.find().exec();
-        if (!users) {
+        const users = await User.find().populate("roleId").exec();
+
+        if (!users || users.length === 0) {
             throw new ApiError({
-                statusCode: 404, message: "No users found", errors: [
+                statusCode: 404,
+                message: "No users found",
+                errors: [
                     { path: "users", message: "No user records exist in the database" }
                 ]
             });
@@ -47,7 +52,7 @@ const userService = {
 
         return {
             message: "Users fetched successfully",
-            data: users,
+            users,
         };
     },
     getUserById: async (userId: string) => {
@@ -59,7 +64,8 @@ const userService = {
             if (cached) {
                 return {
                     message: "User fetched successfully (cached)",
-                    data: cached,
+                    user: cached,
+                    success: true,
                 };
             }
         } catch (err) {
@@ -84,7 +90,8 @@ const userService = {
 
         return {
             message: "User fetched successfully",
-            data: user,
+            user,
+            success: true,
         };
     },
     updateUserById: async (userId: string, updateData: Partial<typeof User>) => {

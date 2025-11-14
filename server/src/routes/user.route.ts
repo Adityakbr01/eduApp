@@ -23,7 +23,7 @@ router.post("/approved-user/:id", checkRole(ROLES.ADMIN, ROLES.MANAGER), checkPe
 //Todo : --> add assign permission
 
 // CRUD Users
-router.get("/", checkRole(ROLES.ADMIN, ROLES.MANAGER), checkPermission(PERMISSIONS.USERS_READ), userController.getAllUsers);
+router.get("/", checkRole(ROLES.ADMIN, ROLES.MANAGER), checkPermission(PERMISSIONS.USER_READ), userController.getAllUsers);
 router.get("/:id", checkRole(ROLES.ADMIN, ROLES.MANAGER, ROLES.SUPPORT), checkPermission(PERMISSIONS.USER_READ), userController.getUserById);
 router.put("/:id", validateSchema(updateUserSchema), checkRole(ROLES.ADMIN, ROLES.MANAGER, ROLES.SUPPORT), checkPermission(PERMISSIONS.USER_UPDATE), userController.updateUserById);
 router.delete("/:id", checkRole(ROLES.ADMIN, ROLES.MANAGER), checkPermission(PERMISSIONS.USER_DELETE), userController.deleteUserById);

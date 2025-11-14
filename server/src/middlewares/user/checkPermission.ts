@@ -10,6 +10,7 @@ const checkPermission = (permission: string) => {
             return next(new ApiError({ statusCode: 401, message: "Login required" }));
         }
 
+
         if (!user.permissions || !user.permissions.includes(permission)) {
             logger.warn(
                 `Permission Denied: User ${user.id ?? "unknown"} | Missing: ${permission}`
