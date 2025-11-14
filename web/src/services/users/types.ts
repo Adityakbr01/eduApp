@@ -29,7 +29,36 @@ export interface ApproveUserResponse {
     statusCode: number;
 }
 
+
 // Payload you send to backend
 export interface ApproveUserPayload {
     userId: string;
 }
+
+
+
+//All api response look like
+
+export interface GenericApiResponse<T> {
+    success: boolean;
+    message: string;
+    data: {
+        message: string;
+        data: T;
+    };
+    meta: unknown | null;
+    timestamp: string;
+    path: string;
+    statusCode: number;
+}
+
+
+export type ApiResult<T> = {
+    success: boolean;
+    message: string;
+    data: T;
+    meta: unknown | null;
+    timestamp: string;
+    path: string;
+    statusCode: number;
+};

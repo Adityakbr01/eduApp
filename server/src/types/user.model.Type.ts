@@ -49,7 +49,7 @@ export interface IUser {
     permissions?: string[];
 
     isBanned: boolean;
-
+    bannedBy?: Types.ObjectId;
     instructorProfile?: InstructorProfile;
     studentProfile?: StudentProfile;
     managerProfile?: ManagerProfile;

@@ -16,12 +16,13 @@ import type { UserRow } from "./types";
 type UserActionsMenuProps = {
     user: UserRow;
     onView: () => void;
-    onBan: () => void;
-    onDelete: () => void;
+
 };
 
-export function UserActionsMenu({ user, onView, onBan, onDelete }: UserActionsMenuProps) {
+export function UserActionsMenu({ user, onView }: UserActionsMenuProps) {
     const approveMutation = usersMutations.useApproveUser();
+    const banMutation = usersMutations.useBanUser();
+    const deleteMutation = usersMutations.useDeleteUser();
 
     const handleApprove = () => {
         approveMutation.mutate({ userId: user.id });
@@ -29,10 +30,6 @@ export function UserActionsMenu({ user, onView, onBan, onDelete }: UserActionsMe
 
     const isApproved =
         user.status.label.toLowerCase() === "pending approval".toLowerCase();
-
-    console.log(user.status.label);
-
-    console.log("UserActionsMenu Rendered for user:", isApproved);
 
     return (
         <DropdownMenu>
@@ -64,15 +61,15 @@ export function UserActionsMenu({ user, onView, onBan, onDelete }: UserActionsMe
                     </DropdownMenuItem>
                 )}
 
-                <DropdownMenuItem onClick={onBan}>
+                <DropdownMenuItem onClick={() => banMutation.mutate({ userId: user.id })} disabled={banMutation.isPending}>
                     <ShieldBan className="mr-2 h-4 w-4" />
-                    Ban User
+                    {banMutation.isPending ? user.status.label : user.status.label.toLowerCase() === "banned" ? "Unban User" : "Ban User"}
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem
-                    onClick={onDelete}
+                    onClick={() => deleteMutation.mutate(user.id)}
                     className="text-red-600 focus:text-red-600"
                 >
                     <Trash2 className="mr-2 h-4 w-4" />

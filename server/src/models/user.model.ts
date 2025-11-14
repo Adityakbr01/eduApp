@@ -62,7 +62,7 @@ const userSchema = new Schema<IUser>(
         permissions: [{ type: String }], // e.g. ["READ_USER", "WRITE_COURSE"]
         //! Global Flags
         isBanned: { type: Boolean, default: false },
-
+        bannedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
 
         //! Instructor Profile (only create for instructor users)
         instructorProfile: {

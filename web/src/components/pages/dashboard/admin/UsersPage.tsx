@@ -2,12 +2,13 @@
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
-    CardTitle
+    CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -23,6 +24,7 @@ import { useRef, type Dispatch, type SetStateAction } from "react";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ROLES } from "@/validators/auth.schema";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import type { UserRow } from "./types";
@@ -31,13 +33,42 @@ import { UserActionsMenu } from "./UserActionsMenu";
 type UsersProps = {
     filterRole: string | null;
     setFilterRole: Dispatch<SetStateAction<string | null>>;
+
+    page: number;
+    setPage: Dispatch<SetStateAction<number>>;
+
+    limit: number;
+    setLimit: Dispatch<SetStateAction<number>>;
+
+    pagination: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+        hasPrev: boolean;
+        hasNext: boolean;
+    };
+
     isLoadingUsers?: boolean;
     isUsersError?: boolean;
     usersError?: Error | null;
     rowsToRender?: UserRow[];
 };
 
-function UsersPage({ ...props }: UsersProps) {
+
+function UsersPage({
+    filterRole,
+    setFilterRole,
+    page,
+    setPage,
+    limit,
+    setLimit,
+    pagination,
+    isLoadingUsers,
+    isUsersError,
+    usersError,
+    rowsToRender,
+}: UsersProps) {
     const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
     // GSAP animation
@@ -65,14 +96,36 @@ function UsersPage({ ...props }: UsersProps) {
             );
         },
         {
-            dependencies: [props.rowsToRender], // animate on new rows
+            dependencies: [rowsToRender], // animate on new rows
             scope: tableBodyRef, // GSAP handles cleanup automatically
         }
     );
 
+    const totalItems = pagination?.total ?? 0;
+    const fromItem = totalItems === 0 ? 0 : (page - 1) * limit + 1;
+    const toItem = totalItems === 0 ? 0 : Math.min(page * limit, totalItems);
+    const perPageOptions = [5, 10, 25, 50];
+
+    const handleLimitChange = (value: string) => {
+        const parsed = Number(value);
+        if (Number.isNaN(parsed)) return;
+        setLimit(parsed);
+        setPage(1); // reset to first page so user is never stranded
+    };
+
+    const handlePrev = () => {
+        if (!pagination?.hasPrev) return;
+        setPage(Math.max(1, page - 1));
+    };
+
+    const handleNext = () => {
+        if (!pagination?.hasNext) return;
+        setPage(Math.min(pagination.totalPages, page + 1));
+    };
+
     return (
         <section className="grid gap-6 lg:grid-cols-[1fr]">
-            <Card>
+            <Card className="border-none shadow-none bg-transparent flex-1">
                 <CardHeader className="flex flex-row items-center justify-between">
                     <div>
                         <CardTitle>Users</CardTitle>
@@ -80,9 +133,9 @@ function UsersPage({ ...props }: UsersProps) {
                     </div>
 
                     <Select
-                        value={props.filterRole ?? undefined}
+                        value={filterRole ?? undefined}
                         onValueChange={(value) =>
-                            props.setFilterRole(value === "all" ? null : value)
+                            setFilterRole(value === "all" ? null : value)
                         }
                     >
                         <SelectTrigger className="w-full md:w-[200px]">
@@ -100,7 +153,7 @@ function UsersPage({ ...props }: UsersProps) {
                     </Select>
                 </CardHeader>
 
-                <CardContent>
+                <CardContent className="space-y-4">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -114,7 +167,7 @@ function UsersPage({ ...props }: UsersProps) {
 
                         {/* GSAP Animation Target */}
                         <TableBody ref={tableBodyRef}>
-                            {props.isLoadingUsers &&
+                            {isLoadingUsers &&
                                 Array.from({ length: 4 }).map((_, i) => (
                                     <TableRow key={`sk-${i}`}>
                                         <TableCell colSpan={5}>
@@ -129,9 +182,19 @@ function UsersPage({ ...props }: UsersProps) {
                                     </TableRow>
                                 ))}
 
-                            {!props.isLoadingUsers &&
-                                !props.isUsersError &&
-                                props.rowsToRender?.map((user) => (
+                            {isUsersError && (
+                                <TableRow>
+                                    <TableCell colSpan={5}>
+                                        <p className="text-center text-sm text-destructive">
+                                            {usersError?.message || "Failed to load users"}
+                                        </p>
+                                    </TableCell>
+                                </TableRow>
+                            )}
+
+                            {!isLoadingUsers &&
+                                !isUsersError &&
+                                rowsToRender?.map((user) => (
                                     <TableRow key={user.id}>
                                         <TableCell>
                                             <div className="flex items-center gap-3">
@@ -173,18 +236,72 @@ function UsersPage({ ...props }: UsersProps) {
                                         <TableCell className="text-right">
                                             <UserActionsMenu
                                                 user={user}
-
-                                                onBan={() => { }}
-                                                onDelete={() => { }}
                                                 onView={() => { }}
                                             />
                                         </TableCell>
-
-
                                     </TableRow>
                                 ))}
+
+                            {!isLoadingUsers &&
+                                !isUsersError &&
+                                (!rowsToRender || rowsToRender.length === 0) && (
+                                    <TableRow>
+                                        <TableCell colSpan={5}>
+                                            <p className="text-center text-sm text-muted-foreground">
+                                                No users match the current filters.
+                                            </p>
+                                        </TableCell>
+                                    </TableRow>
+                                )}
                         </TableBody>
                     </Table>
+
+                    <div className="flex flex-col gap-3 border-t pt-4 text-sm md:flex-row md:items-center md:justify-between">
+                        <p className="text-muted-foreground">
+                            {totalItems === 0
+                                ? "No records to display"
+                                : `Showing ${fromItem}–${toItem} of ${totalItems}`}
+                        </p>
+
+                        <div className="flex flex-col gap-3 md:flex-row md:items-center">
+                            <div className="flex items-center gap-2">
+                                <span className="text-muted-foreground">Rows per page</span>
+                                <Select value={String(limit)} onValueChange={handleLimitChange}>
+                                    <SelectTrigger className="w-[90px]">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {perPageOptions.map((option) => (
+                                            <SelectItem key={option} value={String(option)}>
+                                                {option}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="flex items-center gap-2 self-end md:self-auto">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handlePrev}
+                                    disabled={!pagination?.hasPrev || isLoadingUsers}
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                    Prev
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleNext}
+                                    disabled={!pagination?.hasNext || isLoadingUsers}
+                                >
+                                    Next
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
                 </CardContent>
             </Card>
         </section>

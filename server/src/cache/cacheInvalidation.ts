@@ -2,6 +2,8 @@ import cacheManager from "./cacheManager.js";
 import { cacheKeyFactory } from "./cacheKeyFactory.js";
 import logger from "src/helpers/logger.js";
 
+const PAGINATED_USERS_PATTERN = "users:page=*";
+
 /**
  * Cache Invalidation Helpers
  * Centralized functions to invalidate related caches when data changes
@@ -16,7 +18,8 @@ export const cacheInvalidation = {
             await Promise.all([
                 cacheManager.del(cacheKeyFactory.user.byId(userId)),
                 cacheManager.del(cacheKeyFactory.user.permissions(userId)),
-                cacheManager.del(cacheKeyFactory.user.all())
+                cacheManager.del(cacheKeyFactory.user.all()),
+                cacheManager.delPattern(PAGINATED_USERS_PATTERN)
             ]);
         } catch (err) {
             logger.warn("Failed to invalidate user cache:", err);
@@ -28,7 +31,10 @@ export const cacheInvalidation = {
      */
     async invalidateUserList(): Promise<void> {
         try {
-            await cacheManager.del(cacheKeyFactory.user.all());
+            await Promise.all([
+                cacheManager.del(cacheKeyFactory.user.all()),
+                cacheManager.delPattern(PAGINATED_USERS_PATTERN)
+            ]);
         } catch (err) {
             logger.warn("Failed to invalidate user list cache:", err);
         }

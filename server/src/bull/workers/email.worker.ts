@@ -7,11 +7,13 @@ import resetPasswordOtpProcessor from "../jobs/email/resetPasswordOtp.job.js";
 import { EMAIL_QUEUE_NAME } from "../queues/email.queue.js";
 import logger from "src/helpers/logger.js";
 import accountApproveProcessor from "../jobs/email/accountApprove.job.js";
+import accountBanProcessor from "../jobs/email/accountBan.job.js";
 
 export const EMAIL_JOB_Names = {
     REGISTER_OTP: "register-otp",
     RESET_PASS_OTP: "reset-pass-otp",
     ACCOUNT_APPROVAL: "account-approval",
+    ACCOUNT_BAN: "account-ban",
 };
 
 // ✅ SAFER centralized rate map
@@ -19,6 +21,7 @@ const EMAIL_RATE_LIMITS = {
     [EMAIL_JOB_Names.REGISTER_OTP]: EMAIL_LIMITS?.["register-otp"] || null,
     [EMAIL_JOB_Names.RESET_PASS_OTP]: EMAIL_LIMITS?.["reset-pass-otp"] || null,
     [EMAIL_JOB_Names.ACCOUNT_APPROVAL]: EMAIL_LIMITS?.["account-approval"] || null,
+    [EMAIL_JOB_Names.ACCOUNT_BAN]: EMAIL_LIMITS?.["account-ban"] || null,
 };
 
 // ✅ AUTO-LIMITER JOB HELPER
@@ -42,6 +45,7 @@ export const emailWorker = new Worker(
             [EMAIL_JOB_Names.REGISTER_OTP]: registerOtpProcessor,
             [EMAIL_JOB_Names.RESET_PASS_OTP]: resetPasswordOtpProcessor,
             [EMAIL_JOB_Names.ACCOUNT_APPROVAL]: accountApproveProcessor,
+            [EMAIL_JOB_Names.ACCOUNT_BAN]: accountBanProcessor, // To be implemented
         };
 
         const processor = processors[job.name];

@@ -18,6 +18,7 @@ export const PERMISSIONS = {
     USER_UPDATE: "user:update",  // e.g update user profile
     USER_DELETE: "user:delete",  // e.g delete user account
     USER_MANAGE: "user:manage", // e.g manage user roles, permissions, etc.
+    USER_BAN: "user:ban",       // e.g ban a user
 
     STUDENT_READ: "student:read",      // e.g view student profile
     STUDENT_SUPPORT: "student:support", // e.g provide support to students

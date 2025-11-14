@@ -27,6 +27,7 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import type { User } from "@/services/auth";
 import { usersQueries } from "@/services/users/index";
+import type { UsersQueryParams } from "@/services/users/queries";
 import { approvalStatusEnum } from "@/store/auth";
 import UsersPage from "./UsersPage";
 import type { StatusMeta, UserRow } from "./types";
@@ -65,19 +66,13 @@ const mockUsers: UserRow[] = [
         id: "USR-7610",
         name: "Sana Fakih",
         email: "sana@eduapp.com",
-        roleLabel: "Student",
+        roleLabel: "Moderator",
         status: { label: "Active", className: "bg-emerald-100 text-emerald-800" },
         lastActive: "5 mins ago",
     },
-    {
-        id: "USR-5508",
-        name: "Dev Malhotra",
-        email: "dev@eduapp.com",
-        roleLabel: "Student",
-        status: { label: "Suspended", className: "bg-rose-100 text-rose-800" },
-        lastActive: "Suspended",
-    },
 ];
+
+
 
 const permissionScopes = [
     { key: "read", label: "Read" },
@@ -95,10 +90,19 @@ type RolePermission = {
 };
 
 const initialRolePermissions: RolePermission[] = [
-
+    {
+        role: "Super Admin",
+        description: "Full platform control",
+        permissions: {
+            read: true,
+            invite: true,
+            update: true,
+            delete: true,
+        },
+    },
     {
         role: "Admin",
-        description: "Manage users & courses & full platform",
+        description: "Manage users & courses",
         permissions: {
             read: true,
             invite: true,
@@ -107,8 +111,8 @@ const initialRolePermissions: RolePermission[] = [
         },
     },
     {
-        role: "instructor",
-        description: "Assist instructors",
+        role: "Instructor",
+        description: "Teach & assist learners",
         permissions: {
             read: true,
             invite: false,
@@ -138,8 +142,6 @@ const formatLastActive = (timestamp?: string): string => {
         return "—";
     }
 };
-
-
 
 
 
@@ -187,18 +189,26 @@ const mapApiUserToRow = (user: User): UserRow => ({
     id: user._id,
     name: user.name || "Unnamed",
     email: user.email,
-    roleLabel: user.roleId?.name || "Unknown role",
+    roleLabel: user.roleName || user.roleId?.name || "Unknown role",
     status: getStatusMeta(user),
     lastActive: formatLastActive(user.updatedAt ?? user.createdAt),
 });
 
 function DashBoardPage() {
+
+    const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(10);
+
+    const queryParams: UsersQueryParams = { page, limit };
+
     const {
-        data: usersData,
+        data,
         isLoading: isLoadingUsers,
         isError: isUsersError,
         error: usersError,
-    } = usersQueries.useGetUsers();
+    } = usersQueries.useGetUsers(queryParams);
+
+
     const [activeSection, setActiveSection] = useState(sidebarItems[1].value);
     const [rolePermissions, setRolePermissions] = useState<RolePermission[]>(initialRolePermissions);
     const [searchQuery, setSearchQuery] = useState("");
@@ -209,45 +219,59 @@ function DashBoardPage() {
         return selected?.label ?? "Users";
     }, [activeSection]);
 
+    const users = useMemo(() => data?.users || [], [data?.users]);
+    const pagination = useMemo(
+        () =>
+            data?.pagination || {
+                total: 0,
+                page,
+                limit,
+                totalPages: 1,
+                hasPrev: page > 1,
+                hasNext: false,
+            },
+        [data?.pagination, page, limit],
+    );
+
     const stats = useMemo(() => {
-        if (!usersData || usersData.length === 0) {
+        if (!users || users.length === 0) {
             return quickStats;
         }
-        const totalUsers = usersData.length;
-        const verifiedUsers = usersData.filter((user: User) => user.isEmailVerified).length;
-        const pendingApprovals = usersData.filter((user: User) => user.approvalStatus === approvalStatusEnum.PENDING).length;
-        const bannedUsers = usersData.filter((user: User) => user.isBanned).length;
+        const totalUsers = users.length;
+        const verifiedUsers = users.filter((user: User) => user.isEmailVerified).length;
+        const pendingApprovals = users.filter((user: User) => user.approvalStatus === approvalStatusEnum.PENDING).length;
+        const bannedUsers = users.filter((user: User) => user.isBanned).length;
 
         return [
             {
                 label: "Total Users",
-                value: totalUsers.toLocaleString(),
+                value: totalUsers?.toLocaleString(),
                 trend: `${verifiedUsers} verified accounts`,
             },
             {
                 label: "Pending Approval",
-                value: pendingApprovals.toLocaleString(),
+                value: pendingApprovals?.toLocaleString(),
                 trend: pendingApprovals ? "Needs review" : "All approved",
             },
             {
                 label: "Banned Accounts",
-                value: bannedUsers.toLocaleString(),
+                value: bannedUsers?.toLocaleString(),
                 trend: bannedUsers ? "Action required" : "No bans active",
             },
         ];
-    }, [usersData]);
+    }, [users]);
 
     const userRows = useMemo<UserRow[]>(() => {
-        if (!usersData) return [];
-        return usersData.map(mapApiUserToRow);
-    }, [usersData]);
+        if (!users) return [];
+        return users.map(mapApiUserToRow);
+    }, [users]);
 
-    const shouldFallbackToMock = !usersData && !isLoadingUsers && !isUsersError;
-    let rowsToRender = shouldFallbackToMock ? mockUsers : userRows;
+    const shouldFallbackToMock = !users?.length && !isLoadingUsers && !isUsersError;
+    let rowsToRender: UserRow[] = shouldFallbackToMock ? mockUsers : userRows;
 
     // Apply search and role filter
     if (searchQuery.trim() || filterRole) {
-        rowsToRender = rowsToRender.filter((user) => {
+        rowsToRender = rowsToRender.filter((user: UserRow) => {
             const matchesSearch = searchQuery.trim() === "" ||
                 user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 user.email.toLowerCase().includes(searchQuery.toLowerCase());
@@ -353,13 +377,17 @@ function DashBoardPage() {
 
                     {activeSection === "users" && (
                         <UsersPage
-
                             filterRole={filterRole}
                             setFilterRole={setFilterRole}
+                            page={page}
+                            setPage={setPage}
+                            limit={limit}
+                            setLimit={setLimit}
+                            pagination={pagination}
+                            rowsToRender={rowsToRender}
                             isLoadingUsers={isLoadingUsers}
                             isUsersError={isUsersError}
                             usersError={usersError}
-                            rowsToRender={rowsToRender}
                         />
                     )}
 

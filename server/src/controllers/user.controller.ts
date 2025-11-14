@@ -3,9 +3,15 @@ import { ApiResponder } from "src/utils/ApiResponder.js";
 import { wrapAsync } from "src/utils/wrapAsync.js";
 
 const userController = {
+    //Adding pagination now
     getAllUsers: wrapAsync(async (req, res) => {
-        const result = await userService.getAllUsers();
-        ApiResponder.success(res, 200, result.message, result.users);
+        const result = await userService.getAllUsers(req.query);
+        ApiResponder.success(res, 200, result.message, {
+            users: result.users,
+            pagination: result.pagination
+        }, {
+            pagination: result.pagination
+        });
     }),
     getUserById: wrapAsync(async (req, res) => {
         const userId = req.params.id;
@@ -24,11 +30,9 @@ const userController = {
     }),
     deleteUserById: wrapAsync(async (req, res) => {
         const userId = req.params.id;
-        const result = await userService.deleteUserById(userId);
-        ApiResponder.success(res, 200, "User deleted successfully", {
-            message: result.message,
-            data: result.data,
-        });
+        const deleteBy = req.user!.id;
+        const result = await userService.deleteUserById(userId, deleteBy);
+        ApiResponder.success(res, 200, result.message, result.data);
     }),
 
     // Roles and Permissions
@@ -62,6 +66,11 @@ const userController = {
             message: result.message,
             data: result.data,
         });
+    }),
+    banUser: wrapAsync(async (req, res) => {
+        const userId = req.params.id;
+        const result = await userService.banUser(userId, req.user!.id);
+        ApiResponder.success(res, 200, result.message, result.data);
     }),
 };
 

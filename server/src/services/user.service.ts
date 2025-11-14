@@ -14,16 +14,29 @@ import logger from "src/helpers/logger.js";
 import { success } from "zod";
 
 const userService = {
-    getAllUsers: async () => {
-        const cacheKey = cacheKeyFactory.user.all();
+    //Adding pagination now
+    getAllUsers: async (reqQuery) => {
+        let { page = 1, limit = 10 } = reqQuery;
 
-        // Try cache first
+        page = Number(page);
+        limit = Number(limit);
+
+        const skip = (page - 1) * limit;
+
+        // Build Query (optional filters)
+        const query = {};
+
+
+        // Redis Cache Key
+        const cacheKey = cacheKeyFactory.user.paginated(page, limit, reqQuery.search, reqQuery.roleId);
+
         try {
             const cached = await cacheManager.get(cacheKey);
             if (cached) {
                 return {
                     message: "Users fetched successfully (cached)",
-                    users: cached,
+                    users: cached.users,
+                    pagination: cached.pagination,
                     success: true,
                 };
             }
@@ -31,28 +44,44 @@ const userService = {
             logger.warn("cache.get failed in getAllUsers:", err);
         }
 
-        const users = await User.find().populate("roleId").exec();
+        // Fetch Users with Pagination
+        const [users, totalUsers] = await Promise.all([
+            User.find(query)
+                .populate("roleId")
+                .skip(skip)
+                .limit(limit)
+                .exec(),
+            User.countDocuments(query),
+        ]);
 
-        if (!users || users.length === 0) {
+        if (!users.length) {
             throw new ApiError({
                 statusCode: 404,
                 message: "No users found",
-                errors: [
-                    { path: "users", message: "No user records exist in the database" }
-                ]
+                errors: [{ path: "users", message: "No user records exist" }],
             });
         }
 
-        // Cache the result
+        const pagination = {
+            total: totalUsers,
+            page,
+            limit,
+            totalPages: Math.ceil(totalUsers / limit),
+            hasNext: page < Math.ceil(totalUsers / limit),
+            hasPrev: page > 1,
+        };
+
+        // Cache result
         try {
-            await cacheManager.set(cacheKey, users, TTL.USER_LIST);
+            await cacheManager.set(cacheKey, { users, pagination }, TTL.USER_LIST);
         } catch (err) {
-            logger.warn("cache.set failed in getAllUsers:", err);
+            logger.warn("cache.set failed:", err);
         }
 
         return {
             message: "Users fetched successfully",
             users,
+            pagination,
         };
     },
     getUserById: async (userId: string) => {
@@ -112,8 +141,9 @@ const userService = {
             data: user,
         };
     },
-    deleteUserById: async (userId: string) => {
-        const user = await User.findByIdAndDelete(userId).exec();
+    deleteUserById: async (userId: string, deletedBy: string) => {
+        //Todo : add soft delete
+        const user = await User.findById(userId).exec();
         if (!user) {
             throw new ApiError({
                 statusCode: 404, message: "User not found", errors: [
@@ -121,6 +151,16 @@ const userService = {
                 ]
             });
         }
+
+        if (deletedBy.toString() === userId.toString()) {
+            throw new ApiError({
+                statusCode: 403, message: "You cannot delete your own account", errors: [
+                    { path: "user", message: "Users cannot delete their own account" }
+                ]
+            });
+        }
+
+        await User.findByIdAndDelete(userId).exec();
 
         // Invalidate all user-related caches
         await cacheInvalidation.invalidateUser(userId);
@@ -331,7 +371,47 @@ const userService = {
             data: user,
         };
     },
-};
+    banUser: async (userId: string, bannedBy: string) => {
 
+        const user = await User.findById(userId).exec();
+        if (!user) {
+            throw new ApiError({
+                statusCode: 404, message: "User not found", errors: [
+                    { path: "user", message: "No user found with the given ID" }
+                ]
+            });
+        }
+
+        if (userId.toString() === bannedBy.toString()) {
+            throw new ApiError({
+                statusCode: 403, message: "You cannot ban your own account", errors: [
+                    { path: "user", message: "You cannot ban your own account" }
+                ]
+            });
+        }
+
+        if (!user.isBanned) {
+            await addEmailJob(emailQueue, EMAIL_JOB_Names.ACCOUNT_BAN, {
+                to: user.email,
+            });
+        }
+
+        if (user.isBanned) {
+            user.isBanned = false; // Unban the user
+        } else {
+            user.isBanned = true; // Ban the user
+            user.bannedBy = new Types.ObjectId(bannedBy);
+        }
+        await user.save();
+
+        // Invalidate user caches when user is banned or unbanned
+        await cacheInvalidation.invalidateUser(userId);
+
+        return {
+            message: user.isBanned ? "User banned successfully" : "User unbanned successfully",
+            data: user,
+        };
+    }
+};
 
 export default userService;
