@@ -2,7 +2,6 @@
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
@@ -27,6 +26,7 @@ import { ROLES } from "@/validators/auth.schema";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import type { UserRow } from "./types";
+import { UserActionsMenu } from "./UserActionsMenu";
 
 type UsersProps = {
     filterRole: string | null;
@@ -169,11 +169,18 @@ function UsersPage({ ...props }: UsersProps) {
                                             {user.lastActive}
                                         </TableCell>
 
+
                                         <TableCell className="text-right">
-                                            <Button variant="ghost" size="sm" className="text-xs">
-                                                Manage
-                                            </Button>
+                                            <UserActionsMenu
+                                                user={user}
+
+                                                onBan={() => { }}
+                                                onDelete={() => { }}
+                                                onView={() => { }}
+                                            />
                                         </TableCell>
+
+
                                     </TableRow>
                                 ))}
                         </TableBody>

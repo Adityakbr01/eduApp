@@ -26,7 +26,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import type { User } from "@/services/auth";
-import { usersQueries } from "@/services/users";
+import { usersQueries } from "@/services/users/index";
 import { approvalStatusEnum } from "@/store/auth";
 import UsersPage from "./UsersPage";
 import type { StatusMeta, UserRow } from "./types";
@@ -139,20 +139,48 @@ const formatLastActive = (timestamp?: string): string => {
     }
 };
 
-const getStatusMeta = (user: User): StatusMeta => {
+
+
+
+
+export const getStatusMeta = (user: User): StatusMeta => {
+    // 🔴 BANNED — Always highest priority
     if (user.isBanned) {
-        return { label: "Banned", className: statusPalette.danger };
+        return {
+            label: "Banned",
+            className: statusPalette.danger,
+        };
     }
+
+    // ❌ REJECTED
     if (user.approvalStatus === approvalStatusEnum.REJECTED) {
-        return { label: "Rejected", className: statusPalette.danger };
+        return {
+            label: "Rejected",
+            className: statusPalette.danger,
+        };
     }
+
+    // ⏳ PENDING
     if (user.approvalStatus === approvalStatusEnum.PENDING) {
-        return { label: "Pending approval", className: statusPalette.warning };
+        return {
+            label: "Pending approval",
+            className: statusPalette.warning,
+        };
     }
+
+    // ✉️ EMAIL NOT VERIFIED
     if (!user.isEmailVerified) {
-        return { label: "Email unverified", className: statusPalette.info };
+        return {
+            label: "Email unverified",
+            className: statusPalette.info,
+        };
     }
-    return { label: "Active", className: statusPalette.success };
+
+    // 🟢 ACTIVE (Approved + Verified + Not banned)
+    return {
+        label: "Active",
+        className: statusPalette.success,
+    };
 };
 
 const mapApiUserToRow = (user: User): UserRow => ({
@@ -325,6 +353,7 @@ function DashBoardPage() {
 
                     {activeSection === "users" && (
                         <UsersPage
+
                             filterRole={filterRole}
                             setFilterRole={setFilterRole}
                             isLoadingUsers={isLoadingUsers}
