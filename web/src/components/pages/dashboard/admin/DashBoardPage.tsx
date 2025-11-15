@@ -10,7 +10,7 @@ import {
     Shield,
     Users,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -53,6 +53,9 @@ const mockUsers: UserRow[] = [
         roleLabel: "Admin",
         status: { label: "Active", className: "bg-emerald-100 text-emerald-800" },
         lastActive: "2 hours ago",
+        rolePermissions: ["user:read", "user:update"],
+        customPermissions: ["user:invite"],
+        permissions: ["user:read", "user:update", "user:invite"],
     },
     {
         id: "USR-1023",
@@ -61,6 +64,9 @@ const mockUsers: UserRow[] = [
         roleLabel: "Instructor",
         status: { label: "Pending invite", className: "bg-amber-100 text-amber-800" },
         lastActive: "Pending invite",
+        rolePermissions: ["course:read"],
+        customPermissions: [],
+        permissions: ["course:read"],
     },
     {
         id: "USR-7610",
@@ -69,6 +75,9 @@ const mockUsers: UserRow[] = [
         roleLabel: "Moderator",
         status: { label: "Active", className: "bg-emerald-100 text-emerald-800" },
         lastActive: "5 mins ago",
+        rolePermissions: ["discussion:read"],
+        customPermissions: ["discussion:delete"],
+        permissions: ["discussion:read", "discussion:delete"],
     },
 ];
 
@@ -185,14 +194,35 @@ export const getStatusMeta = (user: User): StatusMeta => {
     };
 };
 
-const mapApiUserToRow = (user: User): UserRow => ({
-    id: user._id,
-    name: user.name || "Unnamed",
-    email: user.email,
-    roleLabel: user.roleName || user.roleId?.name || "Unknown role",
-    status: getStatusMeta(user),
-    lastActive: formatLastActive(user.updatedAt ?? user.createdAt),
-});
+const mapApiUserToRow = (user: User): UserRow => {
+    const rolePermissions = user.rolePermissions ?? [];
+    const hasCustomPayload = Array.isArray(user.customPermissions);
+    const rawCustomPermissions = hasCustomPayload ? user.customPermissions ?? [] : [];
+    const rawLegacyPermissions = Array.isArray(user.permissions) ? user.permissions : [];
+
+    const effectivePermissions = user.effectivePermissions?.length
+        ? user.effectivePermissions
+        : hasCustomPayload
+            ? [...new Set([...rolePermissions, ...rawCustomPermissions])]
+            : rawLegacyPermissions.length
+                ? rawLegacyPermissions
+                : [...new Set(rolePermissions)];
+
+    return {
+        id: user._id,
+        name: user.name || "Unnamed",
+        email: user.email,
+        roleLabel: user.roleName || user.roleId?.name || "Unknown role",
+        roleDescription: user.roleId?.description,
+        status: getStatusMeta(user),
+        lastActive: formatLastActive(user.updatedAt ?? user.createdAt),
+        rolePermissions,
+        customPermissions: rawCustomPermissions,
+        permissions: effectivePermissions,
+        effectivePermissions,
+        sourceUser: user,
+    };
+};
 
 function DashBoardPage() {
 
@@ -220,6 +250,12 @@ function DashBoardPage() {
     }, [activeSection]);
 
     const users = useMemo(() => data?.users || [], [data?.users]);
+
+    useEffect(() => {
+        if (!data?.users || data.users.length === 0) return;
+        if (process.env.NODE_ENV === "production") return;
+        console.debug("[AdminDashboard] Users payload", data.users);
+    }, [data?.users]);
     const pagination = useMemo(
         () =>
             data?.pagination || {

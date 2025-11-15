@@ -14,7 +14,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         PERMISSIONS.PAYMENT_HISTORY,
         PERMISSIONS.USER_READ,
 
-        PERMISSIONS.USERS_READ,
+        PERMISSIONS.USER_READ,
         PERMISSIONS.USER_UPDATE,
         PERMISSIONS.USER_DELETE,
         PERMISSIONS.USER_MANAGE,
@@ -24,7 +24,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         PERMISSIONS.COURSE_CREATE,
         PERMISSIONS.COURSE_READ,
         PERMISSIONS.COURSE_UPDATE,
-        
+
         PERMISSIONS.STUDENT_READ,
     ],
 

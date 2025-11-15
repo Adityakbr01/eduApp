@@ -1,6 +1,6 @@
-import { useQuery, UseQueryOptions } from "@tanstack/react-query";
-import api from "@/lib/api/axios";
 import { QUERY_KEYS } from "@/config/query-keys";
+import api from "@/lib/api/axios";
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { User } from "../auth";
 
 
@@ -59,11 +59,14 @@ const usersApi = {
             },
         };
     },
+    getUserById: async (userId: string): Promise<User | null> => {
+        const res = await api.get<ApiResponse<User>>(`/users/${userId}`);
+        return res.data.data || null;
+    }
 };
 
 
-
-export const useGetUsers = (
+const useGetUsers = (
     params?: UsersQueryParams,
     options?: Omit<
         UseQueryOptions<UsersApiResult, Error>,
@@ -84,10 +87,23 @@ export const useGetUsers = (
     });
 };
 
+const useGetUserById = (userId: string, options?: Omit<
+    UseQueryOptions<User | null, Error>,
+    "queryKey" | "queryFn"
+>) => {
+    return useQuery<User | null, Error>({
+        queryKey: [QUERY_KEYS.USERS.DETAIL, userId],
+        queryFn: () => usersApi.getUserById(userId),
+        enabled: !!userId,
+        staleTime: 5 * 60 * 1000,
+        ...options,
+    });
+}
 
 const usersQueries = {
     api: usersApi,
     useGetUsers,
+    useGetUserById,
 };
 
 export default usersQueries;

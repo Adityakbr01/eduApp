@@ -1,20 +1,22 @@
 import { Types } from "mongoose";
 import emailQueue from "src/bull/queues/email.queue.js";
 import { addEmailJob, EMAIL_JOB_Names } from "src/bull/workers/email.worker.js";
+import cacheInvalidation from "src/cache/cacheInvalidation.js";
+import { cacheKeyFactory } from "src/cache/cacheKeyFactory.js";
+import cacheManager from "src/cache/cacheManager.js";
+import { TTL } from "src/cache/cacheTTL.js";
+import { attachPermissionsToUser, type RolePermissionCache } from "src/helpers/attachUserPermissionHelper.js";
+import logger from "src/helpers/logger.js";
 import { getUserPermissions } from "src/middlewares/user/getUserPermissions.js";
 import { RoleModel } from "src/models/RoleAndPermissions/role.model.js";
 import User from "src/models/user.model.js";
 import { approvalStatusEnum } from "src/types/user.model.Type.js";
 import { ApiError } from "src/utils/apiError.js";
-import cacheManager from "src/cache/cacheManager.js";
-import { cacheKeyFactory } from "src/cache/cacheKeyFactory.js";
-import { TTL } from "src/cache/cacheTTL.js";
-import cacheInvalidation from "src/cache/cacheInvalidation.js";
-import logger from "src/helpers/logger.js";
-import { success } from "zod";
+
+
+
 
 const userService = {
-    //Adding pagination now
     getAllUsers: async (reqQuery) => {
         let { page = 1, limit = 10 } = reqQuery;
 
@@ -33,9 +35,22 @@ const userService = {
         try {
             const cached = await cacheManager.get(cacheKey);
             if (cached) {
+                const rolePermissionsCache: RolePermissionCache = new Map();
+                let cachedUsers = Array.isArray(cached.users) ? cached.users : [];
+
+                const needsEnrichment = cachedUsers.some((user) => !user?.rolePermissions || !user?.effectivePermissions);
+
+                if (needsEnrichment) {
+                    cachedUsers = await Promise.all(
+                        cachedUsers.map((user) => attachPermissionsToUser(user, rolePermissionsCache))
+                    );
+                    cached.users = cachedUsers;
+                    await cacheManager.set(cacheKey, cached, TTL.USER_LIST);
+                }
+
                 return {
                     message: "Users fetched successfully (cached)",
-                    users: cached.users,
+                    users: cachedUsers,
                     pagination: cached.pagination,
                     success: true,
                 };
@@ -54,6 +69,8 @@ const userService = {
             User.countDocuments(query),
         ]);
 
+
+
         if (!users.length) {
             throw new ApiError({
                 statusCode: 404,
@@ -61,6 +78,9 @@ const userService = {
                 errors: [{ path: "users", message: "No user records exist" }],
             });
         }
+
+
+
 
         const pagination = {
             total: totalUsers,
@@ -71,16 +91,21 @@ const userService = {
             hasPrev: page > 1,
         };
 
+        const rolePermissionsCache: RolePermissionCache = new Map();
+        const usersWithPermissions = await Promise.all(
+            users.map((user) => attachPermissionsToUser(user, rolePermissionsCache))
+        );
+
         // Cache result
         try {
-            await cacheManager.set(cacheKey, { users, pagination }, TTL.USER_LIST);
+            await cacheManager.set(cacheKey, { users: usersWithPermissions, pagination }, TTL.USER_LIST);
         } catch (err) {
             logger.warn("cache.set failed:", err);
         }
 
         return {
             message: "Users fetched successfully",
-            users,
+            users: usersWithPermissions,
             pagination,
         };
     },
@@ -91,9 +116,15 @@ const userService = {
         try {
             const cached = await cacheManager.get(cacheKey);
             if (cached) {
+                let cachedUser = cached;
+                if (!cachedUser?.rolePermissions || !cachedUser?.effectivePermissions) {
+                    cachedUser = await attachPermissionsToUser(cachedUser);
+                    await cacheManager.set(cacheKey, cachedUser, TTL.USER_PROFILE);
+                }
+
                 return {
                     message: "User fetched successfully (cached)",
-                    user: cached,
+                    user: cachedUser,
                     success: true,
                 };
             }
@@ -110,16 +141,18 @@ const userService = {
             })
         }
 
+        const enrichedUser = await attachPermissionsToUser(user);
+
         // Cache the result
         try {
-            await cacheManager.set(cacheKey, user, TTL.USER_PROFILE);
+            await cacheManager.set(cacheKey, enrichedUser, TTL.USER_PROFILE);
         } catch (err) {
             logger.warn("cache.set failed in getUserById:", err);
         }
 
         return {
             message: "User fetched successfully",
-            user,
+            user: enrichedUser,
             success: true,
         };
     },

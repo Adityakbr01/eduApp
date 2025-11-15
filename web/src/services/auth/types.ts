@@ -21,6 +21,9 @@ export interface User {
     approvalStatus: approvalStatusEnum;
     isBanned: boolean;
     permissions: string[];
+    rolePermissions?: string[];
+    customPermissions?: string[];
+    effectivePermissions?: string[];
     address?: string;
     createdAt?: string;
     updatedAt?: string;
