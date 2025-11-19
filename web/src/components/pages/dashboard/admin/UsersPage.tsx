@@ -53,6 +53,7 @@ type UsersProps = {
     isUsersError?: boolean;
     usersError?: Error | null;
     rowsToRender?: UserRow[];
+    CanManageUser?: boolean
 };
 
 
@@ -68,6 +69,7 @@ function UsersPage({
     isUsersError,
     usersError,
     rowsToRender,
+    CanManageUser,
 }: UsersProps) {
     const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
@@ -161,7 +163,7 @@ function UsersPage({
                                 <TableHead>Role</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead className="hidden md:table-cell">Last Active</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                {CanManageUser && <TableHead className="text-right">Actions</TableHead>}
                             </TableRow>
                         </TableHeader>
 
@@ -234,10 +236,10 @@ function UsersPage({
 
 
                                         <TableCell className="text-right">
-                                            <UserActionsMenu
+                                            {CanManageUser && <UserActionsMenu
                                                 user={user}
                                                 onView={() => { }}
-                                            />
+                                            />}
                                         </TableCell>
                                     </TableRow>
                                 ))}

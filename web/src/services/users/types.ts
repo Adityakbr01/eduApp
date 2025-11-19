@@ -15,6 +15,24 @@ export interface ApprovedUser {
     __v: number;
 }
 
+export interface PermissionSummary {
+    _id: string;
+    code: string;
+    description?: string;
+}
+
+export interface RoleWithPermissions {
+    _id: string;
+    name: string;
+    description?: string;
+    permissions: PermissionSummary[];
+}
+
+export interface RolesAndPermissionsPayload {
+    message: string;
+    data: RoleWithPermissions[];
+}
+
 // API response structure
 export interface ApproveUserResponse {
     success: boolean;
@@ -34,6 +52,14 @@ export interface ApproveUserResponse {
 export interface ApproveUserPayload {
     userId: string;
 }
+
+export interface PermissionMutationPayload {
+    userId: string;
+    permission: string[];
+}
+
+export type AssignPermissionsPayload = PermissionMutationPayload;
+export type DeletePermissionsPayload = PermissionMutationPayload;
 
 
 
@@ -62,3 +88,11 @@ export type ApiResult<T> = {
     path: string;
     statusCode: number;
 };
+
+export type PermissionMutationResponse = ApiResult<{
+    message: string;
+    data: ApprovedUser;
+}>;
+
+export type AssignPermissionsResponse = PermissionMutationResponse;
+export type DeletePermissionsResponse = PermissionMutationResponse;

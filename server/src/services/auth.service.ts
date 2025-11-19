@@ -6,6 +6,7 @@ import cacheManager from "src/cache/cacheManager.js";
 import { TTL } from "src/cache/cacheTTL.js";
 import _config from "src/configs/_config.js";
 import { ROLES } from "src/constants/roles.js";
+import { attachPermissionsToUser } from "src/helpers/attachUserPermissionHelper.js";
 import CheckUserEmailAndBanned from "src/helpers/checkUserEmailAndBanned.js";
 import { RoleModel } from "src/models/RoleAndPermissions/role.model.js";
 import User from "src/models/user.model.js";
@@ -52,6 +53,8 @@ const authService = {
                 message: "Your account is banned",
             });
         }
+
+
 
         // ✅ Step 3: If user exists but NOT verified → resend OTP
         if (existingUser && !existingUser.isEmailVerified) {
@@ -431,9 +434,6 @@ const authService = {
         };
     },
     refreshTokenService: async (refreshToken: string) => {
-        logger.info(`🔄 Refresh token request`);
-        logger.info(`📝 Refresh Token received (first 20 chars): ${refreshToken ? refreshToken.substring(0, 20) + '...' : 'MISSING'}`);
-
         if (!refreshToken) {
             throw new ApiError({
                 statusCode: 401,
@@ -464,7 +464,6 @@ const authService = {
             });
         }
 
-        logger.info(`🔍 Validating session in Redis for user: ${decoded.userId}`);
         const sessionIsValid = await sessionService.validateSession(decoded.userId, refreshToken);
 
         if (!sessionIsValid) {
@@ -584,18 +583,25 @@ const authService = {
             });
         }
 
+        const enrichedUser = await attachPermissionsToUser(user);
+        const roleInfo = enrichedUser.roleId as any;
+        const normalizedRoleId = roleInfo?._id ?? roleInfo?.id ?? roleInfo;
+        const roleName = roleInfo?.name ?? req.user.role;
+
         const responseUser = {
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            roleId: user.roleId?._id,
-            roleName: (user.roleId as any)?.name,
-            isEmailVerified: user.isEmailVerified,
-            approvalStatus: user.approvalStatus,
-            isBanned: user.isBanned,
-            permissions: req.user.permissions,
-            phone: user.phone,
-            address: user.address,
+            _id: enrichedUser._id,
+            name: enrichedUser.name,
+            email: enrichedUser.email,
+            roleId: normalizedRoleId,
+            roleName,
+            isEmailVerified: enrichedUser.isEmailVerified,
+            approvalStatus: enrichedUser.approvalStatus,
+            isBanned: enrichedUser.isBanned,
+            permissions: enrichedUser.effectivePermissions,
+            rolePermissions: enrichedUser.rolePermissions,
+            customPermissions: enrichedUser.customPermissions,
+            phone: enrichedUser.phone,
+            address: enrichedUser.address,
         };
 
         // Populate cache for future requests (best-effort)

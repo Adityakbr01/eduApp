@@ -27,7 +27,6 @@ class SessionService {
      * Overwrites any existing session (enforces single device login)
      */
     async createSession(userId: string, refreshToken: string): Promise<void> {
-        logger.info(`🔐 Creating session for user: ${userId}`);
 
         const sessionKey = this.getSessionKey(userId);
         const ttl = _config.JWT_REFRESH_TOKEN_EXPIRES_IN_SECONDS;
@@ -119,9 +118,6 @@ class SessionService {
         await cacheManager.set(sessionKey, updatedSession, ttl);
     }
 
-    /**
-     * Check if user has an active session
-     */
     async hasActiveSession(userId: string): Promise<boolean> {
         const session = await this.getSession(userId);
         if (!session) return false;

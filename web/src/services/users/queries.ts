@@ -2,6 +2,7 @@ import { QUERY_KEYS } from "@/config/query-keys";
 import api from "@/lib/api/axios";
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { User } from "../auth";
+import type { RoleWithPermissions, RolesAndPermissionsPayload } from "./types";
 
 
 export interface ApiResponse<T> {
@@ -44,6 +45,10 @@ export type UsersQueryParams = {
     limit?: number;
 };
 
+
+
+
+
 const usersApi = {
     getUsers: async (params: UsersQueryParams = {}): Promise<UsersApiResult> => {
         const res = await api.get<ApiResponse<UsersApiResult>>("/users", { params });
@@ -62,7 +67,12 @@ const usersApi = {
     getUserById: async (userId: string): Promise<User | null> => {
         const res = await api.get<ApiResponse<User>>(`/users/${userId}`);
         return res.data.data || null;
-    }
+    },
+    getAllRoleANDPermission: async (): Promise<RoleWithPermissions[]> => {
+        const res = await api.get<ApiResponse<RolesAndPermissionsPayload>>(`/users/getAllRoleANDPermission`);
+        return res.data.data?.data ?? [];
+    },
+
 };
 
 
@@ -100,10 +110,23 @@ const useGetUserById = (userId: string, options?: Omit<
     });
 }
 
+const useGetAllRoleANDPermission = (options?: Omit<
+    UseQueryOptions<RoleWithPermissions[], Error>,
+    "queryKey" | "queryFn"
+>) => {
+    return useQuery<RoleWithPermissions[], Error>({
+        queryKey: [QUERY_KEYS.USERS.ALL_ROLES_PERMISSIONS],
+        queryFn: () => usersApi.getAllRoleANDPermission(),
+        staleTime: 5 * 60 * 1000,
+        ...options,
+    });
+};
+
 const usersQueries = {
     api: usersApi,
     useGetUsers,
     useGetUserById,
+    useGetAllRoleANDPermission,
 };
 
 export default usersQueries;

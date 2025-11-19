@@ -22,7 +22,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Loader2, User, Mail, Lock, Phone, MapPin, Building2, Users } from "lucide-react";
+import { Building2, Eye, EyeOff, Loader2, Lock, Mail, MapPin, Phone, User, Users } from "lucide-react";
 
 import ROUTES from "@/lib/CONSTANTS/ROUTES";
 import { secureLocalStorage } from "@/lib/utils/encryption";

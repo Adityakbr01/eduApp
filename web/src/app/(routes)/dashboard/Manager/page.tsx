@@ -1,8 +1,18 @@
+import DashBoardPage from "@/components/pages/dashboard/manager/DashBoard";
+import RoleGate from "@/components/pages/dashboard/RoleGate";
+import APP_INFO from "@/lib/CONSTANTS/APP_INFO";
+import { ROLES } from "@/validators/auth.schema";
 
-function page() {
+export const metadata = {
+    title: `Manager Dashboard | ${APP_INFO.NAME}`,
+    description: "Manager dashboard for managing the application.",
+};
+
+
+export default function Page() {
     return (
-        <div>page</div>
-    )
+        <RoleGate allowed={[ROLES.MANAGER, ROLES.ADMIN]}>
+            <DashBoardPage />
+        </RoleGate>
+    );
 }
-
-export default page

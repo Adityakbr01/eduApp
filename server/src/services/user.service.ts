@@ -13,7 +13,18 @@ import User from "src/models/user.model.js";
 import { approvalStatusEnum } from "src/types/user.model.Type.js";
 import { ApiError } from "src/utils/apiError.js";
 
+const normalizePermissions = (permissions?: unknown[]) => {
+    if (!Array.isArray(permissions)) return [];
+    return [...new Set(permissions.map((perm) => (perm ?? "").toString()))].sort();
+};
 
+const permissionsArrayChanged = (next?: unknown[], prev: unknown[] = []) => {
+    if (!Array.isArray(next)) return false;
+    const normalizedNext = normalizePermissions(next);
+    const normalizedPrev = normalizePermissions(prev);
+    if (normalizedNext.length !== normalizedPrev.length) return true;
+    return normalizedNext.some((perm, idx) => perm !== normalizedPrev[idx]);
+};
 
 
 const userService = {
@@ -157,8 +168,8 @@ const userService = {
         };
     },
     updateUserById: async (userId: string, updateData: Partial<typeof User>) => {
-        const user = await User.findByIdAndUpdate(userId, updateData, { new: true }).exec();
-        if (!user) {
+        const existingUser = await User.findById(userId).exec();
+        if (!existingUser) {
             throw new ApiError({
                 statusCode: 404, message: "User not found", errors: [
                     { path: "user", message: "No user found with the given ID" }
@@ -166,12 +177,42 @@ const userService = {
             });
         }
 
-        // Invalidate all user-related caches
+        const previousRoleId = existingUser.roleId?.toString();
+        const previousPermissions = Array.isArray(existingUser.permissions) ? [...existingUser.permissions] : [];
+        const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true }).exec();
+
+        if (!updatedUser) {
+            throw new ApiError({
+                statusCode: 500,
+                message: "Failed to apply user updates",
+                errors: [{ path: "user", message: "Unable to update user" }]
+            });
+        }
+
+        const updatePayload = updateData as Record<string, unknown>;
+        const incomingRoleId = updatePayload?.roleId ? String(updatePayload.roleId) : undefined;
+        const roleChanged = Boolean(incomingRoleId && incomingRoleId !== previousRoleId);
+        const permissionsChanged = permissionsArrayChanged(updatePayload?.permissions as unknown[], previousPermissions);
+
         await cacheInvalidation.invalidateUser(userId);
+
+        if (roleChanged) {
+            if (previousRoleId) {
+                await cacheInvalidation.invalidateUsersWithRole(previousRoleId);
+            }
+            if (updatedUser.roleId) {
+                await cacheInvalidation.invalidateUsersWithRole(updatedUser.roleId.toString());
+            }
+            await cacheInvalidation.invalidateAllUserPermissions();
+            await cacheInvalidation.invalidateUserSession(userId);
+        } else if (permissionsChanged) {
+            await cacheInvalidation.invalidateAllUserPermissions();
+            await cacheInvalidation.invalidateUserSession(userId);
+        }
 
         return {
             message: "User updated successfully",
-            data: user,
+            data: updatedUser,
         };
     },
     deleteUserById: async (userId: string, deletedBy: string) => {
@@ -203,7 +244,7 @@ const userService = {
             data: user,
         };
     },
-    getRolesAndPermissions: async () => {
+    getAllRoleANDPermission: async () => {
         const cacheKey = cacheKeyFactory.role.all();
 
         // Try cache first
@@ -319,6 +360,8 @@ const userService = {
 
         // Invalidate user caches when permissions change
         await cacheInvalidation.invalidateUser(userId);
+        await cacheInvalidation.invalidateAllUserPermissions();
+        await cacheInvalidation.invalidateUserSession(userId);
 
         return {
             message: "Permissions assigned successfully",
@@ -356,6 +399,8 @@ const userService = {
 
         // Invalidate user caches when permissions change
         await cacheInvalidation.invalidateUser(userId);
+        await cacheInvalidation.invalidateAllUserPermissions();
+        await cacheInvalidation.invalidateUserSession(userId);
 
         return {
             message: "Permissions deleted successfully",

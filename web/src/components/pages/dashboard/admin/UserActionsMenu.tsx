@@ -24,7 +24,7 @@ import { usersMutations } from "@/services/users/index";
 import { CheckCircle, MoreVertical, ShieldBan, Trash2, User } from "lucide-react";
 import type { UserRow } from "./types";
 import { useState } from "react";
-import UserProfileModal from "./UserProfileModal";
+import UserProfileModal from "./UserProfileModel/UserProfileModal";
 
 type UserActionsMenuProps = {
     user: UserRow;
@@ -120,6 +120,7 @@ export function UserActionsMenu({ user, onView }: UserActionsMenuProps) {
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <DropdownMenuItem
+                                className=""
                                 disabled={banMutation.isPending}
                                 onSelect={(event) => event.preventDefault()}
                             >

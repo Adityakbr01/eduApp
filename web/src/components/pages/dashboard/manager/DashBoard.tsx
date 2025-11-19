@@ -2,10 +2,12 @@
 
 import {
     Bell,
+    Lock,
     LogOut,
     Plus,
     Search
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -13,38 +15,52 @@ import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
-    CardTitle,
+    CardTitle
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
-import { PERMISSIONS } from "@/lib/CONSTANTS/PERMISSIONS";
 import { cn } from "@/lib/utils";
-import { CheckPermission, collectPermissions } from "@/lib/utils/permissions";
+import { PERMISSIONS } from "@/lib/CONSTANTS/PERMISSIONS";
+import { CheckPermission, collectPermissions, hasAnyPermission, missingPermissions } from "@/lib/utils/permissions";
 import type { User } from "@/services/auth";
 import { usersQueries } from "@/services/users/index";
 import type { UsersQueryParams } from "@/services/users/queries";
 import { approvalStatusEnum, useAuthStore } from "@/store/auth";
-import UsersPage from "./UsersPage";
-import type { UserRow } from "./types";
-import OverviewWidgets from "./OverviewWidgets";
-import { adminUtils, PermissionKey, RolePermission } from "./utils";
+import UsersPage from "../admin/UsersPage";
+import type { UserRow } from "../admin/types";
+import OverviewWidgets from "../admin/OverviewWidgets";
+import { adminUtils } from "../admin/utils";
 
 
 function DashBoardPage() {
-
+    const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(10);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [filterRole, setFilterRole] = useState<string | null>(null);
 
     const user = useAuthStore((state) => state.user);
+    console.log("Current User in Manager Dashboard:", user);
     const permissionSet = useMemo(() => collectPermissions(user), [user]);
+    const canViewUsers = hasAnyPermission(permissionSet, [
+        PERMISSIONS.USER_READ,
+        PERMISSIONS.USER_MANAGE,
+    ]);
+
     const CanManageUser = CheckPermission({
         carrier: permissionSet,
         requirement: PERMISSIONS.USER_MANAGE,
     });
 
-    const [page, setPage] = useState(1);
-    const [limit, setLimit] = useState(10);
+    console.log(CanManageUser)
+
+    const missingUserPermissions = useMemo(
+        () => (canViewUsers ? [] : missingPermissions(permissionSet, [
+            PERMISSIONS.USER_READ,
+            PERMISSIONS.USER_MANAGE,
+        ])),
+        [canViewUsers, permissionSet],
+    );
 
     const queryParams: UsersQueryParams = { page, limit };
 
@@ -53,26 +69,26 @@ function DashBoardPage() {
         isLoading: isLoadingUsers,
         isError: isUsersError,
         error: usersError,
-    } = usersQueries.useGetUsers(queryParams);
+    } = usersQueries.useGetUsers(queryParams, {
+        enabled: canViewUsers,
+    });
 
 
-    const [activeSection, setActiveSection] = useState(adminUtils.sidebarItems[0].value);
-    const [rolePermissions, setRolePermissions] = useState<RolePermission[]>(adminUtils.initialRolePermissions);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [filterRole, setFilterRole] = useState<string | null>(null);
+    const [activeSection, setActiveSection] = useState(adminUtils.ManagerSidebarItems[0].value);
 
     const sectionTitle = useMemo(() => {
-        const selected = adminUtils.sidebarItems.find((item) => item.value === activeSection);
+        const selected = adminUtils.ManagerSidebarItems.find((item) => item.value === activeSection);
         return selected?.label ?? "overview";
     }, [activeSection]);
 
-    const users = useMemo(() => data?.users || [], [data?.users]);
+    const users = useMemo(() => (canViewUsers ? data?.users || [] : []), [canViewUsers, data?.users]);
 
     useEffect(() => {
+        if (!canViewUsers) return;
         if (!data?.users || data.users.length === 0) return;
         if (process.env.NODE_ENV === "production") return;
-        console.debug("[AdminDashboard] Users payload", data.users);
-    }, [data?.users]);
+        console.debug("[ManagerDashboard] Users payload", data.users);
+    }, [canViewUsers, data?.users]);
     const pagination = useMemo(
         () =>
             data?.pagination || {
@@ -130,7 +146,7 @@ function DashBoardPage() {
     const courseInsights = useMemo(() => adminUtils.buildCourseInsights(userRows), [userRows]);
     const banSummary = useMemo(() => adminUtils.buildBanSummary(userRows), [userRows]);
 
-    const shouldFallbackToMock = !users?.length && !isLoadingUsers && !isUsersError;
+    const shouldFallbackToMock = canViewUsers && !users?.length && !isLoadingUsers && !isUsersError;
     let rowsToRender: UserRow[] = shouldFallbackToMock ? adminUtils.mockUsers : userRows;
 
     // Apply search and role filter
@@ -144,30 +160,20 @@ function DashBoardPage() {
         });
     }
 
-    const handleTogglePermission = (role: string, permissionKey: PermissionKey, checked: boolean) => {
-        setRolePermissions((prev) =>
-            prev.map((entry) =>
-                entry.role === role
-                    ? {
-                        ...entry,
-                        permissions: { ...entry.permissions, [permissionKey]: checked },
-                    }
-                    : entry,
-            ),
-        );
-    };
+
+
 
 
     return (
         <div className="bg-muted/30 flex min-h-screen">
-            <aside className="hidden w-64 flex-col border-r `bg-linear-to-b from-primary/5 to-background/80 p-6 lg:flex">
+            <aside className="hidden w-64 flex-col border-r bg-linear-to-b from-primary/5 to-background/80 p-6 lg:flex">
                 <div className="mb-8 space-y-2 rounded-lg bg-primary/10 p-3">
-                    <p className="text-xs uppercase text-primary font-semibold">🔐 Admin Panel</p>
-                    <h1 className="text-lg font-bold text-primary">EduApp Admin</h1>
-                    <p className="text-xs text-muted-foreground">Full system control</p>
+                    <p className="text-xs uppercase text-primary font-semibold">🔐 Manager</p>
+                    <h1 className="text-lg font-bold text-primary">EduApp Manager</h1>
+                    <p className="text-xs text-muted-foreground">Manager dashboard </p>
                 </div>
                 <nav className="space-y-2">
-                    {adminUtils.sidebarItems.map(({ label, icon: Icon, value }) => (
+                    {adminUtils.ManagerSidebarItems.map(({ label, icon: Icon, value }) => (
                         <button
                             key={value}
                             onClick={() => setActiveSection(value)}
@@ -199,7 +205,7 @@ function DashBoardPage() {
                 <header className="border-b bg-linear-to-r from-primary/5 via-background/80 to-background/80 px-4 py-4 backdrop-blur md:px-8">
                     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                         <div>
-                            <p className="text-sm text-primary font-semibold">🛡️ Admin Dashboard</p>
+                            <p className="text-sm text-primary font-semibold">🛡️ Manager Dashboard</p>
                             <h2 className="text-2xl font-bold tracking-tight text-primary">{sectionTitle}</h2>
                         </div>
                         <div className="flex flex-col gap-2 sm:flex-row">
@@ -231,78 +237,84 @@ function DashBoardPage() {
                             activityFeed={activityFeed}
                             courseInsights={courseInsights}
                             banSummary={banSummary}
-                            titlePrefix="Admin "
+                            titlePrefix="Manager "
                         />
                     )}
 
                     {activeSection === "users" && (
-                        <UsersPage
-                            filterRole={filterRole}
-                            setFilterRole={setFilterRole}
-                            page={page}
-                            setPage={setPage}
-                            limit={limit}
-                            setLimit={setLimit}
-                            pagination={pagination}
-                            rowsToRender={rowsToRender}
-                            isLoadingUsers={isLoadingUsers}
-                            isUsersError={isUsersError}
-                            usersError={usersError}
-                            CanManageUser={CanManageUser}
-                        />
+                        canViewUsers ? (
+                            <UsersPage
+                                filterRole={filterRole}
+                                setFilterRole={setFilterRole}
+                                page={page}
+                                setPage={setPage}
+                                limit={limit}
+                                setLimit={setLimit}
+                                pagination={pagination}
+                                rowsToRender={rowsToRender}
+                                isLoadingUsers={isLoadingUsers}
+                                isUsersError={isUsersError}
+                                usersError={usersError}
+                                CanManageUser={CanManageUser}
+                            />
+                        ) : (
+                            <PermissionGate
+                                title="Team permission required"
+                                description="You need user-read or user-manage access to view this section."
+                                icon={Lock}
+                                missingCodes={missingUserPermissions}
+                            />
+                        )
                     )}
 
-
-                    {activeSection === "permissions" && (
+                    {activeSection === "courses" && (
                         <section>
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>🔑 Role permissions</CardTitle>
-                                    <CardDescription>Define granular access control for all roles</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="grid grid-cols-[1.5fr_repeat(4,minmax(90px,1fr))] items-center gap-4 text-xs font-medium uppercase text-muted-foreground">
-                                        <span>Role</span>
-                                        {adminUtils.permissionScopes.map((scope) => (
-                                            <span key={scope.key}>{scope.label}</span>
-                                        ))}
-                                    </div>
-                                    <Separator />
-                                    <div className="space-y-4">
-                                        {rolePermissions.map((entry) => (
-                                            <div
-                                                key={entry.role}
-                                                className="grid grid-cols-[1.5fr_repeat(4,minmax(90px,1fr))] items-center gap-4 rounded-xl border p-4"
-                                            >
-                                                <div>
-                                                    <p className="font-medium">{entry.role}</p>
-                                                    <p className="text-sm text-muted-foreground">{entry.description}</p>
-                                                </div>
-                                                {adminUtils.permissionScopes.map((scope) => (
-                                                    <div key={`${entry.role}-${scope.key}`} className="flex items-center justify-center">
-                                                        <Switch
-                                                            checked={entry.permissions[scope.key]}
-                                                            onCheckedChange={(checked) =>
-                                                                handleTogglePermission(entry.role, scope.key, checked)
-                                                            }
-                                                            aria-label={`${scope.label} permission for ${entry.role}`}
-                                                        />
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </CardContent>
-                                <CardFooter className="justify-end gap-3">
-                                    <Button variant="outline">Discard</Button>
-                                    <Button>Save changes</Button>
-                                </CardFooter>
-                            </Card>
+                            <h3 className="text-lg font-medium text-primary">Courses Management</h3>
                         </section>
                     )}
                 </div>
             </main>
         </div>
+    );
+}
+
+type PermissionGateProps = {
+    title: string;
+    description: string;
+    icon: LucideIcon;
+    missingCodes?: string[];
+};
+
+function PermissionGate({ title, description, icon: Icon, missingCodes = [] }: PermissionGateProps) {
+    return (
+        <Card className="border border-dashed border-primary/20 bg-background/60">
+            <CardHeader className="flex flex-row items-start gap-3">
+                <div className="rounded-full bg-primary/10 p-2">
+                    <Icon className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                    <CardTitle className="text-base">{title}</CardTitle>
+                    <CardDescription>{description}</CardDescription>
+                </div>
+            </CardHeader>
+            <CardContent>
+                {missingCodes.length > 0 && (
+                    <div className="mt-2 space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground">Missing permissions</p>
+                        <div className="flex flex-wrap gap-2">
+                            {missingCodes.map((code) => (
+                                <span
+                                    key={code}
+                                    className="rounded-md border border-red-200 bg-red-50 px-2 py-1 text-xs font-mono text-red-700"
+                                >
+                                    {code}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </CardContent>
+        </Card>
     );
 }
 

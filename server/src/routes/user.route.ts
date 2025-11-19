@@ -13,15 +13,15 @@ const router = Router();
 router.use(authMiddleware);
 //Manage Permissions and Assign Roles
 //@desc GET ROLES AND PERMISSIONS
-router.get("/roles-permissions", checkRole(ROLES.ADMIN, ROLES.MANAGER), userController.getRolesAndPermissions);
+router.get("/getAllRoleANDPermission", checkRole(ROLES.ADMIN, ROLES.MANAGER), userController.getAllRoleANDPermission);
 //@desc ASSIGN PERMISSIONS
 router.post("/roles-permissions", checkRole(ROLES.ADMIN, ROLES.MANAGER), checkPermission(PERMISSIONS.USER_MANAGE), userController.assignPermissions);
 // @desc DELETE PERMISSIONS
 router.delete("/roles-permissions", checkRole(ROLES.ADMIN, ROLES.MANAGER), checkPermission(PERMISSIONS.USER_MANAGE), userController.deletePermissions);
-//@desc APPROVE USER
+//@desc APPROVE USER,  
 router.post("/approved-user/:id", checkRole(ROLES.ADMIN, ROLES.MANAGER), checkPermission(PERMISSIONS.USER_MANAGE), userController.approveUser);
-//@ban USER
-router.post("/user-ban-unban/:id", checkRole(ROLES.ADMIN, ROLES.MANAGER, ROLES.SUPPORT), checkPermission(PERMISSIONS.USER_MANAGE), userController.banUser);
+//@ban USER ,  
+router.post("/user-ban-unban/:id", checkRole(ROLES.ADMIN, ROLES.MANAGER), checkPermission(PERMISSIONS.USER_MANAGE), userController.banUser);
 //Todo : --> add assign permission
 
 // CRUD Users

@@ -6,16 +6,6 @@
     "auditLog": "C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs\\.9e6f9ce57131d317e353f162f5769f3fa5fbd36b-audit.json",
     "files": [
         {
-            "date": 1762236420884,
-            "name": "C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs\\app-2025-11-04.log",
-            "hash": "bc3bb4c2599e5bc8423c6ca5cece0a9fee173dd6de217f89d811dc9f469a96a2"
-        },
-        {
-            "date": 1762324721933,
-            "name": "C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs\\app-2025-11-05.log",
-            "hash": "7e9de279a1198da115e10484afc9db2188e97d2a0549f9a18a4cf907af343cc0"
-        },
-        {
             "date": 1762395537232,
             "name": "C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs\\app-2025-11-06.log",
             "hash": "8ce6b3daea1489fa95168e84e06b3814b7d5a70a07fc98793d3bde7cb3015f69"
@@ -54,6 +44,21 @@
             "date": 1763199283892,
             "name": "C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs\\app-2025-11-15.log",
             "hash": "70fa4a5e3865e9f8ff7b5a28a6bc4ccfe82b96279539579f99dcb2e24ae25985"
+        },
+        {
+            "date": 1763352639784,
+            "name": "C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs\\app-2025-11-17.log",
+            "hash": "28fbe72491683763938a617f4ac028d4d619007d82a02e0b8788f5e4b15519c5"
+        },
+        {
+            "date": 1763436399821,
+            "name": "C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs\\app-2025-11-18.log",
+            "hash": "5b3d5cb2dccd44563e51363e61874bfd82060dad7af8087f467a1c4e3e7f7c3f"
+        },
+        {
+            "date": 1763552397090,
+            "name": "C:\\Users\\adity\\Desktop\\Complate Projects\\eduApp\\server\\src\\logs\\app-2025-11-19.log",
+            "hash": "2ba2ed4cda9f80724eec548d7940d17b82c379ac9e0c25c95bde827619c002f4"
         }
     ],
     "hashType": "sha256"
